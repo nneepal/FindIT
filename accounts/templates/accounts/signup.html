@@ -1,0 +1,139 @@
+{% load static %}
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>FINDIT - Sign Up</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Noto+Sans:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'accounts/signup.css' %}"/>
+</head>
+<body>
+    <div class="signup-container">
+        <div class="signup-card">
+            <div class="card-accent"></div>
+            
+            <div class="card-content">
+                <!-- Header Section -->
+                <div class="header-section">
+                    <div class="icon-wrapper">
+                        <span class="material-symbols-outlined header-icon">search</span>
+                    </div>
+                    <div class="header-text">
+                        <h1 class="page-title">Join FINDIT</h1>
+                        <p class="page-subtitle">
+                            Create an account to report and track lost or found items.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Signup Form -->
+                <form class="signup-form" method="POST" action="{% url 'accounts:signup' %}">
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                    <div class="form-error-banner">
+                        <span class="material-symbols-outlined">error</span>
+                        <span>{{ form.non_field_errors|join:", " }}</span>
+                    </div>
+                    {% endif %}
+
+                    <!-- Full Name Field -->
+                    <label class="form-label">
+                        <span class="label-text">Full Name</span>
+                        <div class="input-group">
+                            <span class="material-symbols-outlined input-icon">person</span>
+                            <input class="form-input{% if form.full_name.errors %} input-error{% endif %}" name="full_name" placeholder="Enter your full name" type="text" value="{{ form.full_name.value|default:'' }}"/>
+                        </div>
+                        {% if form.full_name.errors %}<span class="field-error">{{ form.full_name.errors|join:", " }}</span>{% endif %}
+                    </label>
+
+                    <!-- Username Field -->
+                    <label class="form-label">
+                        <span class="label-text">Username</span>
+                        <div class="input-group">
+                            <span class="material-symbols-outlined input-icon">alternate_email</span>
+                            <input class="form-input{% if form.username.errors %} input-error{% endif %}" name="username" placeholder="Enter username" type="text" value="{{ form.username.value|default:'' }}"/>
+                        </div>
+                        {% if form.username.errors %}<span class="field-error">{{ form.username.errors|join:", " }}</span>{% endif %}
+                    </label>
+
+                    <!-- Email Field -->
+                    <label class="form-label">
+                        <span class="label-text">Email <span class="optional-label">(optional)</span></span>
+                        <div class="input-group">
+                            <span class="material-symbols-outlined input-icon">mail</span>
+                            <input class="form-input{% if form.email.errors %} input-error{% endif %}" name="email" placeholder="Enter email address" type="email" value="{{ form.email.value|default:'' }}"/>
+                        </div>
+                        {% if form.email.errors %}<span class="field-error">{{ form.email.errors|join:", " }}</span>{% endif %}
+                    </label>
+
+                    <!-- Password Field -->
+                    <label class="form-label">
+                        <span class="label-text">Password</span>
+                        <div class="input-group">
+                            <span class="material-symbols-outlined input-icon">lock</span>
+                            <input class="form-input password-input{% if form.password.errors %} input-error{% endif %}" id="signup-password" name="password" placeholder="••••••••" type="password"/>
+                            <button class="toggle-password" type="button" onclick="togglePw('signup-password', this)">
+                                <span class="material-symbols-outlined">visibility</span>
+                            </button>
+                        </div>
+                        {% if form.password.errors %}<span class="field-error">{{ form.password.errors|join:", " }}</span>{% endif %}
+                    </label>
+
+                    <!-- Confirm Password Field -->
+                    <label class="form-label">
+                        <span class="label-text">Confirm Password</span>
+                        <div class="input-group">
+                            <span class="material-symbols-outlined input-icon">lock_reset</span>
+                            <input class="form-input password-input{% if form.confirm_password.errors %} input-error{% endif %}" id="signup-password2" name="confirm_password" placeholder="••••••••" type="password"/>
+                            <button class="toggle-password" type="button" onclick="togglePw('signup-password2', this)">
+                                <span class="material-symbols-outlined">visibility</span>
+                            </button>
+                        </div>
+                        {% if form.confirm_password.errors %}<span class="field-error">{{ form.confirm_password.errors|join:", " }}</span>{% endif %}
+                    </label>
+
+                    <!-- Submit Button -->
+                    <div class="button-section">
+                        <button class="submit-btn" type="submit">
+                            Sign Up
+                        </button>
+                    </div>
+
+                    <!-- Login Link -->
+                    <div class="footer-link">
+                        <p class="footer-text">
+                            Already have an account?
+                            <a class="login-link" href="{% url 'accounts:login' %}">Login</a>
+                        </p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Background Decorations -->
+    <div class="bg-decoration">
+        <div class="blob blob-top-right"></div>
+        <div class="blob blob-bottom-left"></div>
+    </div>
+    <script>
+        function togglePw(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('.material-symbols-outlined');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.textContent = 'visibility_off';
+            } else {
+                input.type = 'password';
+                icon.textContent = 'visibility';
+            }
+        }
+    </script>
+</body>
+</html>

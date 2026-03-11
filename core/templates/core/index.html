@@ -1,0 +1,203 @@
+{% load static %}
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>FINDIT - Lost and Found Management System</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'core/index.css' %}"/>
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <header class="header">
+        <div class="header-container">
+            <!-- Logo Section -->
+            <div class="logo">
+                <!-- <span class="material-symbols-outlined logo-icon">find_in_page</span> -->
+                <h1 class="logo-text">FINDIT</h1>
+            </div>
+            <!-- Desktop Navigation -->
+            <nav class="nav">
+                <a class="nav-link" href="{% url 'core:index' %}">Home</a>
+                <a class="nav-link" href="#">Search Item</a>
+                <a class="nav-link" href="#">Report Item</a>
+                <a class="nav-link" href="#">Listed Items</a>
+                <a class="nav-link" href="#">Pending Complaints</a>
+            </nav>
+            <!-- Action Icons -->
+            <div class="actions">
+                <button class="icon-btn">
+                    <span class="material-symbols-outlined">search</span>
+                </button>
+                <!-- User Account Dropdown -->
+                <div class="account-menu">
+                    <button class="icon-btn account-btn" id="account-toggle" aria-expanded="false" aria-label="Account menu">
+                        <span class="material-symbols-outlined">account_circle</span>
+                    </button>
+                    <div class="dropdown" id="account-dropdown">
+                        {% if user.is_authenticated %}
+                        <div class="dropdown-header">
+                            <span class="dropdown-username">{{ user.username }}</span>
+                            <span class="dropdown-label">Signed in</span>
+                        </div>
+                        <a class="dropdown-item" href="{% url 'dashboard:index' %}">
+                            <span class="material-symbols-outlined">dashboard</span>
+                            My Dashboard
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item dropdown-item-danger" href="{% url 'accounts:logout' %}">
+                            <span class="material-symbols-outlined">logout</span>
+                            Log Out
+                        </a>
+                        {% else %}
+                        <div class="dropdown-header">
+                            <span class="dropdown-label">Welcome to FINDIT</span>
+                        </div>
+                        <a class="dropdown-item" href="{% url 'accounts:login' %}">
+                            <span class="material-symbols-outlined">login</span>
+                            Log In
+                        </a>
+                        <a class="dropdown-item dropdown-item-primary" href="{% url 'accounts:signup' %}">
+                            <span class="material-symbols-outlined">person_add</span>
+                            Sign Up
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <!-- Central Card Container -->
+        <div class="card-container">
+            <!-- Hero Header Inside Card -->
+            <div class="hero-header">
+                <!-- Abstract Background Image -->
+                <div class="hero-bg" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDmVfs8mUxiKv9khGtG_btejcr7J6EXzDS0BjehaHcdPnpfsMSXVzBOo7sawF6r6b_MWAG4FQX0_sDdhS6sZaw48xTBEU49D-ggd6y5f5TBe5kLTTUzNSJZVTtmAfm5bTaWJXn_uMgO0kpTEenRWNN74pMawF-QkbdhMbxbzi7UGjey5wAR2DTrjaOVEQ0w7WE4cFO-u9AiuFOFtTtOq_Crh_rjJGC3SYoOQVXzzTWmDzREL746dM-KXiSBdjYG4tkgkO97g_RnR7U');"></div>
+                <div class="hero-gradient"></div>
+                <div class="hero-content">
+                    <div class="hero-icon-wrapper">
+                        <!-- <span class="material-symbols-outlined hero-icon">travel_explore</span> -->
+                         <h3>FindIT</h3>
+                    </div>
+                    <h1 class="hero-title">
+                        Connecting lost items with their rightful owners
+                    </h1>
+                    <p class="hero-subtitle">
+                        The easiest way to recover your lost belongings or help someone find theirs.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Split Action Section -->
+            <div class="split-section">
+                <!-- Left: Search Lost Item -->
+                <div class="action-card search-card">
+                    <div class="action-icon-wrapper">
+                        <span class="material-symbols-outlined action-icon">manage_search</span>
+                    </div>
+                    <div class="action-content">
+                        <h2 class="action-title">Search Lost Item</h2>
+                        <p class="action-description">
+                            Did you lose something valuable? Browse to see if your missing item has been turned in.
+                        </p>
+                    </div>
+                    <button class="btn btn-outline">
+                        <span class="material-symbols-outlined">search</span>
+                        <span>Search Database</span>
+                    </button>
+                </div>
+
+                <!-- Right: Report Found Item -->
+                <div class="action-card report-card">
+                    <div class="action-icon-wrapper report-icon-wrapper">
+                        <span class="material-symbols-outlined action-icon">assignment_add</span>
+                    </div>
+                    <div class="action-content">
+                        <h2 class="action-title">Report Found Item</h2>
+                        <p class="action-description">
+                            Did you find something? Be a good samaritan and help return a lost item to its rightful owner by reporting it.
+                        </p>
+                    </div>
+                    <button class="btn btn-primary">
+                        <span class="material-symbols-outlined">add_circle</span>
+                        <span>Report an Item</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quick Stats / Trust Bar -->
+            <div class="trust-bar">
+                <div class="trust-item">
+                    <span class="material-symbols-outlined trust-icon">verified_user</span>
+                    <span>Secure Verification</span>
+                </div>
+                <div class="trust-item">
+                    <span class="material-symbols-outlined trust-icon">schedule</span>
+                    <span>24/7 Reporting</span>
+                </div>
+                <div class="trust-item">
+                    <span class="material-symbols-outlined trust-icon">volunteer_activism</span>
+                    <span>Community Driven</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-top">
+                <!-- Footer Logo -->
+                <div class="footer-logo">
+                    <span class="material-symbols-outlined footer-logo-icon">find_in_page</span>
+                    <span class="footer-logo-text">FINDIT</span>
+                </div>
+                <!-- Footer Links -->
+                <div class="footer-links">
+                    <a class="footer-link" href="#">Contact Us</a>
+                    <a class="footer-link" href="#">Privacy Policy</a>
+                    <a class="footer-link" href="#">Terms of Service</a>
+                    <a class="footer-link" href="#">Help Center</a>
+                </div>
+                <!-- Social Icons -->
+                <div class="social-icons">
+                    <a class="social-icon" href="#">
+                        <span class="material-symbols-outlined">public</span>
+                    </a>
+                    <a class="social-icon" href="#">
+                        <span class="material-symbols-outlined">share</span>
+                    </a>
+                    <a class="social-icon" href="#">
+                        <span class="material-symbols-outlined">mail</span>
+                    </a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p class="copyright">© FINDIT: Lost and Found Management System. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    <script>
+        const toggle = document.getElementById('account-toggle');
+        const dropdown = document.getElementById('account-dropdown');
+        toggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const open = dropdown.classList.toggle('open');
+            toggle.setAttribute('aria-expanded', open);
+        });
+        document.addEventListener('click', () => {
+            dropdown.classList.remove('open');
+            toggle.setAttribute('aria-expanded', 'false');
+        });
+        dropdown.addEventListener('click', (e) => e.stopPropagation());
+    </script>
+</body>
+</html>

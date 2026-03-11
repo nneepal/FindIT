@@ -1,0 +1,283 @@
+{% load static %}
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>FINDIT - My Dashboard</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <!-- Dashboard CSS -->
+    <link rel="stylesheet" href="{% static 'dashboard/dashboard.css' %}"/>
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <a href="{% url 'core:index' %}" class="logo-link">
+                    <h1 class="logo-text">FINDIT</h1>
+                </a>
+            </div>
+            <nav class="nav">
+                <a class="nav-link" href="{% url 'core:index' %}">Home</a>
+                <a class="nav-link" href="#">Search Item</a>
+                <a class="nav-link" href="#">Report Item</a>
+                <a class="nav-link" href="#">Listed Items</a>
+            </nav>
+            <div class="actions">
+                <a href="{% url 'accounts:logout' %}" class="logout-btn">
+                    <span class="material-symbols-outlined">logout</span>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="dashboard-container">
+
+            <!-- Messages -->
+            {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                <div class="message message-{{ message.tags }}">
+                    <span class="material-symbols-outlined">
+                        {% if message.tags == 'success' %}check_circle{% elif message.tags == 'error' %}error{% else %}info{% endif %}
+                    </span>
+                    <span>{{ message }}</span>
+                    <button class="message-close" onclick="this.parentElement.remove()">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Profile Header Card -->
+            <div class="profile-header-card">
+                <div class="profile-hero">
+                    <div class="profile-avatar">
+                        <span class="material-symbols-outlined avatar-icon">account_circle</span>
+                    </div>
+                    <div class="profile-info">
+                        <h1 class="profile-name">
+                            {% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %}
+                        </h1>
+                        <p class="profile-username">@{{ user.username }}</p>
+                        {% if user.email %}
+                        <p class="profile-email">
+                            <span class="material-symbols-outlined">mail</span>
+                            {{ user.email }}
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <span class="material-symbols-outlined stat-icon">calendar_today</span>
+                        <div class="stat-text">
+                            <span class="stat-label">Member since</span>
+                            <span class="stat-value">{{ user.date_joined|date:"M Y" }}</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="material-symbols-outlined stat-icon">assignment</span>
+                        <div class="stat-text">
+                            <span class="stat-label">Reports submitted</span>
+                            <span class="stat-value">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="material-symbols-outlined stat-icon">manage_search</span>
+                        <div class="stat-text">
+                            <span class="stat-label">Items found</span>
+                            <span class="stat-value">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Two-column layout -->
+            <div class="dashboard-grid">
+
+                <!-- Left: Account Information (read-only summary) -->
+                <div class="info-card">
+                    <div class="card-header">
+                        <span class="material-symbols-outlined card-header-icon">person</span>
+                        <h2 class="card-title">Account Information</h2>
+                    </div>
+                    <div class="info-list">
+                        <div class="info-row">
+                            <span class="info-label">
+                                <span class="material-symbols-outlined">badge</span>
+                                Full Name
+                            </span>
+                            <span class="info-value">
+                                {% if user.get_full_name %}{{ user.get_full_name }}{% else %}<em class="no-value">Not set</em>{% endif %}
+                            </span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">
+                                <span class="material-symbols-outlined">alternate_email</span>
+                                Username
+                            </span>
+                            <span class="info-value">{{ user.username }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">
+                                <span class="material-symbols-outlined">mail</span>
+                                Email
+                            </span>
+                            <span class="info-value">
+                                {% if user.email %}{{ user.email }}{% else %}<em class="no-value">Not set</em>{% endif %}
+                            </span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">
+                                <span class="material-symbols-outlined">phone</span>
+                                Phone
+                            </span>
+                            <span class="info-value">
+                                {% if profile.phone_number %}{{ profile.phone_number }}{% else %}<em class="no-value">Not set</em>{% endif %}
+                            </span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">
+                                <span class="material-symbols-outlined">location_on</span>
+                                Address
+                            </span>
+                            <span class="info-value">
+                                {% if profile.address %}{{ profile.address }}{% else %}<em class="no-value">Not set</em>{% endif %}
+                            </span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">
+                                <span class="material-symbols-outlined">cake</span>
+                                Date of Birth
+                            </span>
+                            <span class="info-value">
+                                {% if profile.date_of_birth %}{{ profile.date_of_birth|date:"d M Y" }}{% else %}<em class="no-value">Not set</em>{% endif %}
+                            </span>
+                        </div>
+                        {% if profile.bio %}
+                        <div class="info-row info-row-bio">
+                            <span class="info-label">
+                                <span class="material-symbols-outlined">notes</span>
+                                Bio
+                            </span>
+                            <span class="info-value">{{ profile.bio }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Right: Edit Profile Form -->
+                <div class="edit-card">
+                    <div class="card-header">
+                        <span class="material-symbols-outlined card-header-icon">edit</span>
+                        <h2 class="card-title">Edit Profile</h2>
+                    </div>
+
+                    <form method="POST" action="{% url 'dashboard:index' %}" class="edit-form">
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                        <div class="form-error-banner">
+                            <span class="material-symbols-outlined">error</span>
+                            <span>{{ form.non_field_errors|join:", " }}</span>
+                        </div>
+                        {% endif %}
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="id_first_name">
+                                    <span class="material-symbols-outlined label-icon">badge</span>
+                                    First Name
+                                </label>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}<span class="field-error">{{ form.first_name.errors|join:", " }}</span>{% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="id_last_name">
+                                    <span class="material-symbols-outlined label-icon">badge</span>
+                                    Last Name
+                                </label>
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}<span class="field-error">{{ form.last_name.errors|join:", " }}</span>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="id_email">
+                                <span class="material-symbols-outlined label-icon">mail</span>
+                                Email Address
+                            </label>
+                            {{ form.email }}
+                            {% if form.email.errors %}<span class="field-error">{{ form.email.errors|join:", " }}</span>{% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="id_phone_number">
+                                <span class="material-symbols-outlined label-icon">phone</span>
+                                Phone Number
+                            </label>
+                            {{ form.phone_number }}
+                            {% if form.phone_number.errors %}<span class="field-error">{{ form.phone_number.errors|join:", " }}</span>{% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="id_address">
+                                <span class="material-symbols-outlined label-icon">location_on</span>
+                                Address
+                            </label>
+                            {{ form.address }}
+                            {% if form.address.errors %}<span class="field-error">{{ form.address.errors|join:", " }}</span>{% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="id_date_of_birth">
+                                <span class="material-symbols-outlined label-icon">cake</span>
+                                Date of Birth
+                            </label>
+                            {{ form.date_of_birth }}
+                            {% if form.date_of_birth.errors %}<span class="field-error">{{ form.date_of_birth.errors|join:", " }}</span>{% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="id_bio">
+                                <span class="material-symbols-outlined label-icon">notes</span>
+                                Bio
+                            </label>
+                            {{ form.bio }}
+                            {% if form.bio.errors %}<span class="field-error">{{ form.bio.errors|join:", " }}</span>{% endif %}
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn-save">
+                                <span class="material-symbols-outlined">save</span>
+                                Save Changes
+                            </button>
+                            <button type="reset" class="btn-reset">
+                                <span class="material-symbols-outlined">restart_alt</span>
+                                Reset
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <p class="copyright">© FINDIT: Lost and Found Management System. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

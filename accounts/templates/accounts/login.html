@@ -1,0 +1,121 @@
+{% load static %}
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>FINDIT - Login</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'accounts/login.css' %}"/>
+</head>
+<body>
+    <main class="login-container">
+        <!-- Background Blobs -->
+        <div class="blob blob-top-left"></div>
+        <div class="blob blob-right"></div>
+
+        <!-- Login Card -->
+        <div class="login-card">
+            <!-- Header Section -->
+            <div class="header-section">
+                <div class="brand">
+                    <div class="brand-icon">
+                        <span class="material-symbols-outlined">search</span>
+                    </div>
+                    <span class="brand-text">FINDIT</span>
+                </div>
+                <h2 class="page-title">Welcome Back</h2>
+                <p class="page-subtitle">
+                    Access your account to manage lost and found items
+                </p>
+            </div>
+
+            <!-- Login Form -->
+            <form action="{% url 'accounts:login' %}" class="login-form" method="POST">
+                {% csrf_token %}
+                {% if error %}
+                <div class="form-error-banner">
+                    <span class="material-symbols-outlined">error</span>
+                    <span>{{ error }}</span>
+                </div>
+                {% endif %}
+                <div class="form-fields">
+                    <!-- Username Field -->
+                    <div class="form-group">
+                        <label class="form-label" for="username">Username</label>
+                        <div class="input-wrapper">
+                            <div class="input-icon">
+                                <span class="material-symbols-outlined">person</span>
+                            </div>
+                            <input 
+                                autocomplete="username" 
+                                class="form-input" 
+                                id="username" 
+                                name="username" 
+                                placeholder="Enter your username" 
+                                required 
+                                type="text"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- Password Field -->
+                    <div class="form-group">
+                        <div class="label-row">
+                            <label class="form-label" for="password">Password</label>
+                        </div>
+                        <div class="input-wrapper">
+                            <div class="input-icon">
+                                <span class="material-symbols-outlined">key</span>
+                            </div>
+                            <input 
+                                autocomplete="current-password" 
+                                class="form-input password-input" 
+                                id="password" 
+                                name="password" 
+                                placeholder="••••••••" 
+                                required 
+                                type="password"
+                            />
+                            <button class="toggle-visibility" type="button" onclick="togglePw()">
+                                <span class="material-symbols-outlined" id="pw-icon">visibility_off</span>
+                            </button>
+                        </div>
+                        <div class="forgot-password">
+                            <a class="forgot-link" href="#">Forgot password?</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="submit-section">
+                    <button class="submit-btn" type="submit">Log in</button>
+                </div>
+            </form>
+
+            <!-- Sign Up Link -->
+            <p class="signup-text">
+                Don't have an account?
+                <a class="signup-link" href="{% url 'accounts:signup' %}">Sign up</a>
+            </p>
+        </div>
+    </main>
+    <script>
+        function togglePw() {
+            const input = document.getElementById('password');
+            const icon = document.getElementById('pw-icon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.textContent = 'visibility';
+            } else {
+                input.type = 'password';
+                icon.textContent = 'visibility_off';
+            }
+        }
+    </script>
+</body>
+</html>
