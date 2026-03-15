@@ -1,0 +1,209 @@
+{% load static %}
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Report Found Item - FINDIT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="{% static 'core/report.css' %}"/>
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <h1 class="logo-text">FINDIT</h1>
+            </div>
+            <nav class="nav">
+                <a class="nav-link" href="{% url 'core:index' %}">Home</a>
+                <a class="nav-link" href="{% url 'core:search' %}">Search Item</a>
+                <a class="nav-link active" href="{% url 'core:report' %}">Report Item</a>
+                <a class="nav-link" href="#">Listed Items</a>
+                <a class="nav-link" href="#">Pending Complaints</a>
+            </nav>
+            <div class="actions">
+                {% if user.is_authenticated %}
+                <a class="icon-btn account-btn" href="{% url 'dashboard:index' %}" aria-label="Dashboard">
+                    <span class="material-symbols-outlined">account_circle</span>
+                </a>
+                {% else %}
+                <a class="icon-btn account-btn" href="{% url 'accounts:login' %}" aria-label="Login">
+                    <span class="material-symbols-outlined">account_circle</span>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="report-container">
+            <form class="report-form-wrap" method="POST" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+
+                <div class="upload-section">
+                    <div class="upload-header">
+                        <h3 class="upload-title">Item Image</h3>
+                        <p class="upload-subtitle">Upload a clear photo to help the owner identify their item.</p>
+                    </div>
+                    <div class="upload-wrapper">
+                        <label class="drop-zone" for="file-upload">
+                            <div class="drop-content">
+                                <span class="material-symbols-outlined drop-icon">add_photo_alternate</span>
+                                <p class="drop-main-text">Drag photo here</p>
+                                <p class="drop-sub-text">or click to browse from your device</p>
+                                <span class="select-file-btn">Select File</span>
+                                <p class="selected-file" id="selected-file-name">No file selected</p>
+                            </div>
+                            {{ form.image }}
+                        </label>
+                    </div>
+                    <div class="file-info">
+                        <span class="info-item">
+                            <span class="material-symbols-outlined">check_circle</span> JPG, JPEG, PNG
+                        </span>
+                        <span class="info-item">
+                            <span class="material-symbols-outlined">check_circle</span> Max 5MB
+                        </span>
+                    </div>
+                    {% if form.image.errors %}
+                    <div class="field-errors">{{ form.image.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-section">
+                    <div class="form-header">
+                        <h1 class="form-title">Report Found Item</h1>
+                        <p class="form-description">Please provide details about the item you found to help return it to its owner.</p>
+                    </div>
+
+                    {% if messages %}
+                    <div class="alerts">
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if form.non_field_errors %}
+                    <div class="field-errors">{{ form.non_field_errors }}</div>
+                    {% endif %}
+
+                    <div class="report-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="{{ form.item_name.id_for_label }}">Item Name</label>
+                                {{ form.item_name }}
+                                {% if form.item_name.errors %}<div class="field-errors">{{ form.item_name.errors }}</div>{% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="{{ form.category.id_for_label }}">Category</label>
+                                <div class="select-wrapper">
+                                    {{ form.category }}
+                                    <span class="material-symbols-outlined select-icon">expand_more</span>
+                                </div>
+                                {% if form.category.errors %}<div class="field-errors">{{ form.category.errors }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="{{ form.location_found.id_for_label }}">Location Found</label>
+                                <div class="select-wrapper">
+                                    {{ form.location_found }}
+                                    <span class="material-symbols-outlined input-icon-location">location_on</span>
+                                    <span class="material-symbols-outlined select-icon">expand_more</span>
+                                </div>
+                                {% if form.location_found.errors %}<div class="field-errors">{{ form.location_found.errors }}</div>{% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="{{ form.date_found.id_for_label }}">Date Found</label>
+                                {{ form.date_found }}
+                                {% if form.date_found.errors %}<div class="field-errors">{{ form.date_found.errors }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="form-row checkbox-row">
+                            <div class="form-group">
+                                <label class="form-label" for="{{ form.condition.id_for_label }}">Item Condition</label>
+                                <div class="select-wrapper">
+                                    {{ form.condition }}
+                                    <span class="material-symbols-outlined select-icon">expand_more</span>
+                                </div>
+                                {% if form.condition.errors %}<div class="field-errors">{{ form.condition.errors }}</div>{% endif %}
+                            </div>
+                            <div class="form-group">
+                                <span class="form-label">Is the item valuable?</span>
+                                <div class="radio-group">
+                                    {% for choice in form.is_valuable %}
+                                    <label class="radio-label">
+                                        {{ choice.tag }}
+                                        <span class="radio-text">{{ choice.choice_label }}</span>
+                                    </label>
+                                    {% endfor %}
+                                </div>
+                                {% if form.is_valuable.errors %}<div class="field-errors">{{ form.is_valuable.errors }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="{{ form.description.id_for_label }}">Description / Identifying Details</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}<div class="field-errors">{{ form.description.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="form-actions">
+                            <a class="btn-cancel" href="{% url 'core:index' %}">Cancel</a>
+                            <button class="btn-submit" type="submit">
+                                <span>Submit Report</span>
+                                <span class="material-symbols-outlined">arrow_forward</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-top">
+                <div class="footer-logo">
+                    <span class="material-symbols-outlined footer-logo-icon">find_in_page</span>
+                    <span class="footer-logo-text">FINDIT</span>
+                </div>
+                <div class="footer-links">
+                    <a class="footer-link" href="#">Contact Us</a>
+                    <a class="footer-link" href="#">Privacy Policy</a>
+                    <a class="footer-link" href="#">Terms of Service</a>
+                    <a class="footer-link" href="#">Help Center</a>
+                </div>
+                <div class="social-icons">
+                    <a class="social-icon" href="#">
+                        <span class="material-symbols-outlined">public</span>
+                    </a>
+                    <a class="social-icon" href="#">
+                        <span class="material-symbols-outlined">share</span>
+                    </a>
+                    <a class="social-icon" href="#">
+                        <span class="material-symbols-outlined">mail</span>
+                    </a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p class="copyright">© 2024 FINDIT Management System. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const fileInput = document.getElementById('file-upload');
+        const fileNameTarget = document.getElementById('selected-file-name');
+        if (fileInput && fileNameTarget) {
+            fileInput.addEventListener('change', () => {
+                fileNameTarget.textContent = fileInput.files.length ? fileInput.files[0].name : 'No file selected';
+            });
+        }
+    </script>
+</body>
+</html>

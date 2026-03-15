@@ -1,0 +1,182 @@
+{% load static %}
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>FindIt - Search Lost Item</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="{% static 'core/search.css' %}"/>
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <h1 class="logo-text">FINDIT</h1>
+            </div>
+            <nav class="nav">
+                <a class="nav-link" href="{% url 'core:index' %}">Home</a>
+                <a class="nav-link active" href="{% url 'core:search' %}">Search Item</a>
+                <a class="nav-link" href="{% url 'core:report' %}">Report Item</a>
+                <a class="nav-link" href="#">Listed Items</a>
+                <a class="nav-link" href="#">Pending Complaints</a>
+            </nav>
+            <div class="actions">
+                {% if user.is_authenticated %}
+                <a class="icon-btn account-btn" href="{% url 'dashboard:index' %}" aria-label="Dashboard">
+                    <span class="material-symbols-outlined">account_circle</span>
+                </a>
+                {% else %}
+                <a class="icon-btn account-btn" href="{% url 'accounts:login' %}" aria-label="Login">
+                    <span class="material-symbols-outlined">account_circle</span>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="content-wrapper">
+            <div class="page-header">
+                <h1 class="page-title">Find Your Lost Item</h1>
+                <p class="page-description">Use our smart search to locate items matching your description or upload an image for visual matching.</p>
+            </div>
+
+            {% if messages %}
+            <div class="alerts">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if form.non_field_errors %}
+            <div class="field-errors">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <form class="search-card" method="POST" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+
+                <div class="upload-panel">
+                    <div class="panel-header">
+                        <h3 class="panel-title">Visual Search</h3>
+                        <p class="panel-subtitle">Upload a photo to find similar items automatically.</p>
+                    </div>
+                    <div class="upload-content">
+                        <label class="upload-area" for="search-file-upload">
+                            <div class="upload-icon">
+                                <span class="material-symbols-outlined">add_a_photo</span>
+                            </div>
+                            <div class="upload-text">
+                                <p class="upload-main-text">Click or drag image here</p>
+                                <p class="upload-sub-text">Supports JPG, PNG (Max 5MB)</p>
+                                <p class="selected-file" id="selected-search-file">No file selected</p>
+                            </div>
+                            <span class="browse-btn">Browse Files</span>
+                            {{ form.image }}
+                        </label>
+                    </div>
+                    {% if form.image.errors %}<div class="field-errors">{{ form.image.errors }}</div>{% endif %}
+                </div>
+
+                <div class="form-panel">
+                    <div class="search-form">
+                        <div class="form-group">
+                            <label class="form-label" for="{{ form.item_name.id_for_label }}">Item Name / Keyword</label>
+                            <div class="input-wrapper">
+                                <div class="input-icon">
+                                    <span class="material-symbols-outlined">search</span>
+                                </div>
+                                {{ form.item_name }}
+                            </div>
+                            {% if form.item_name.errors %}<div class="field-errors">{{ form.item_name.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="{{ form.category.id_for_label }}">Category</label>
+                                <div class="select-wrapper">
+                                    {{ form.category }}
+                                    <div class="select-icon">
+                                        <span class="material-symbols-outlined">expand_more</span>
+                                    </div>
+                                </div>
+                                {% if form.category.errors %}<div class="field-errors">{{ form.category.errors }}</div>{% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="{{ form.condition.id_for_label }}">Item Condition</label>
+                                <div class="select-wrapper">
+                                    {{ form.condition }}
+                                    <div class="select-icon">
+                                        <span class="material-symbols-outlined">expand_more</span>
+                                    </div>
+                                </div>
+                                {% if form.condition.errors %}<div class="field-errors">{{ form.condition.errors }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="{{ form.location_lost.id_for_label }}">Location Lost</label>
+                                <div class="input-wrapper">
+                                    <div class="input-icon">
+                                        <span class="material-symbols-outlined">pin_drop</span>
+                                    </div>
+                                    {{ form.location_lost }}
+                                    <div class="select-icon">
+                                        <span class="material-symbols-outlined">expand_more</span>
+                                    </div>
+                                </div>
+                                {% if form.location_lost.errors %}<div class="field-errors">{{ form.location_lost.errors }}</div>{% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="{{ form.date_lost.id_for_label }}">Approximate Date Lost</label>
+                                <div class="input-wrapper">
+                                    <div class="input-icon">
+                                        <span class="material-symbols-outlined">calendar_today</span>
+                                    </div>
+                                    {{ form.date_lost }}
+                                </div>
+                                {% if form.date_lost.errors %}<div class="field-errors">{{ form.date_lost.errors }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="{{ form.description.id_for_label }}">Additional Description</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}<div class="field-errors">{{ form.description.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="btn-secondary" type="reset">Clear Filters</button>
+                        <button class="btn-primary" type="submit">
+                            <span class="material-symbols-outlined">search</span>
+                            <span>Search Items</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <footer class="page-footer">
+                <p class="footer-text">
+                    © FINDIT: Lost and Found Management System. All rights reserved. •
+                    <a class="footer-link" href="#">Privacy Policy</a> •
+                    <a class="footer-link" href="#">Terms of Service</a>
+                </p>
+            </footer>
+        </div>
+    </main>
+
+    <script>
+        const searchFileInput = document.getElementById('search-file-upload');
+        const searchFileName = document.getElementById('selected-search-file');
+        if (searchFileInput && searchFileName) {
+            searchFileInput.addEventListener('change', () => {
+                searchFileName.textContent = searchFileInput.files.length ? searchFileInput.files[0].name : 'No file selected';
+            });
+        }
+    </script>
+</body>
+</html>

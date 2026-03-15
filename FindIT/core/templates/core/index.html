@@ -24,8 +24,8 @@
             <!-- Desktop Navigation -->
             <nav class="nav">
                 <a class="nav-link" href="{% url 'core:index' %}">Home</a>
-                <a class="nav-link" href="#">Search Item</a>
-                <a class="nav-link" href="#">Report Item</a>
+                <a class="nav-link" href="{% url 'core:search' %}">Search Item</a>
+                <a class="nav-link" href="{% url 'core:report' %}">Report Item</a>
                 <a class="nav-link" href="#">Listed Items</a>
                 <a class="nav-link" href="#">Pending Complaints</a>
             </nav>
@@ -126,10 +126,10 @@
                             Did you find something? Be a good samaritan and help return a lost item to its rightful owner by reporting it.
                         </p>
                     </div>
-                    <button class="btn btn-primary">
+                    <a class="btn btn-primary" href="{% url 'core:report' %}">
                         <span class="material-symbols-outlined">add_circle</span>
                         <span>Report an Item</span>
-                    </button>
+                    </a>
                 </div>
             </div>
 
