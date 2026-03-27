@@ -1,0 +1,225 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Listed Items - FINDIT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="{% static 'core/listeditems.css' %}"/>
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <h1 class="logo-text">FINDIT</h1>
+            </div>
+            <nav class="nav">
+                <a class="nav-link" href="{% url 'core:index' %}">Home</a>
+                <a class="nav-link" href="{% url 'core:search' %}">Search Item</a>
+                <a class="nav-link" href="{% url 'core:report' %}">Report Item</a>
+                <a class="nav-link active" href="{% url 'core:listed-items' %}">Listed Items</a>
+                <a class="nav-link" href="{% url 'core:pending-complaints' %}">Pending Complaints</a>
+            </nav>
+            <div class="actions">
+                <button class="icon-btn">
+                    <span class="material-symbols-outlined">search</span>
+                </button>
+                <div class="account-menu">
+                    <button class="icon-btn account-btn" id="account-toggle" aria-expanded="false" aria-label="Account menu">
+                        <span class="material-symbols-outlined">account_circle</span>
+                    </button>
+                    <div class="dropdown" id="account-dropdown">
+                        {% if user.is_authenticated %}
+                        <div class="dropdown-header">
+                            <span class="dropdown-username">{{ user.username }}</span>
+                            <span class="dropdown-label">Signed in</span>
+                        </div>
+                        <a class="dropdown-item" href="{% url 'dashboard:index' %}">
+                            <span class="material-symbols-outlined">dashboard</span>
+                            My Dashboard
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item dropdown-item-danger" href="{% url 'accounts:logout' %}">
+                            <span class="material-symbols-outlined">logout</span>
+                            Log Out
+                        </a>
+                        {% else %}
+                        <div class="dropdown-header">
+                            <span class="dropdown-label">Welcome to FINDIT</span>
+                        </div>
+                        <a class="dropdown-item" href="{% url 'accounts:login' %}">
+                            <span class="material-symbols-outlined">login</span>
+                            Log In
+                        </a>
+                        <a class="dropdown-item dropdown-item-primary" href="{% url 'accounts:signup' %}">
+                            <span class="material-symbols-outlined">person_add</span>
+                            Sign Up
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="content-wrapper">
+            <div class="page-header">
+                <h1 class="page-title">Listed Items</h1>
+                <p class="page-description">Use tabs to view found and lost items. Search and filters work on both tabs.</p>
+            </div>
+
+            {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                <div class="message message-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="tab-strip">
+                <a href="{% url 'core:listed-items' %}?tab=found&q={{ query|urlencode }}&category={{ category|urlencode }}&sort={{ sort|urlencode }}" class="tab-btn {% if active_tab == 'found' %}active{% endif %}">Found Items</a>
+                <a href="{% url 'core:listed-items' %}?tab=lost&q={{ query|urlencode }}&category={{ category|urlencode }}&sort={{ sort|urlencode }}" class="tab-btn {% if active_tab == 'lost' %}active{% endif %}">Lost Items</a>
+            </div>
+
+            <form method="get" class="filter-bar">
+                <input type="hidden" name="tab" value="{{ active_tab }}"/>
+                <div class="search-wrapper">
+                    <span class="material-symbols-outlined search-icon">search</span>
+                    <input type="text" name="q" value="{{ query }}" class="search-input" placeholder="Search by item name, location, or description"/>
+                </div>
+
+                <div class="filter-group">
+                    <div class="filter-select-wrapper">
+                        <select name="category" class="filter-select">
+                            <option value="all" {% if category == 'all' %}selected{% endif %}>All Categories</option>
+                            {% for key, label in category_options %}
+                            <option value="{{ key }}" {% if category == key %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="filter-select-wrapper">
+                        <select name="sort" class="filter-select">
+                            <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Newest First</option>
+                            <option value="oldest" {% if sort == 'oldest' %}selected{% endif %}>Oldest First</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="apply-btn">Apply</button>
+                </div>
+            </form>
+
+            {% if active_tab == 'found' %}
+            <section class="items-grid">
+                {% for item in found_items %}
+                <article class="item-card">
+                    <div class="item-image">
+                        {% if item.image %}
+                        <img src="{{ item.image.url }}" alt="{{ item.item_name }}"/>
+                        {% else %}
+                        <div class="item-image-placeholder">
+                            <span class="material-symbols-outlined">image</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="item-content">
+                        <div class="item-header">
+                            <h3 class="item-title">{{ item.item_name }}</h3>
+                            <span class="item-category">{{ item.get_category_display }}</span>
+                        </div>
+                        <div class="item-details">
+                            <div class="detail-item">
+                                <span class="material-symbols-outlined detail-icon">location_on</span>
+                                <span>{{ item.get_location_found_display }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="material-symbols-outlined detail-icon">calendar_today</span>
+                                <span>{{ item.date_found|date:'M d, Y' }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="material-symbols-outlined detail-icon">person</span>
+                                <span>Reported by {{ item.reported_by.username }}</span>
+                            </div>
+                        </div>
+                        <p class="item-description">{{ item.description }}</p>
+                        <div class="item-footer">
+                            {% if user.is_authenticated %}
+                                {% if item.id in claimed_item_ids %}
+                                <button class="item-button btn-disabled" type="button" disabled>Already Claimed</button>
+                                {% else %}
+                                <form method="post" action="{% url 'core:claim-found-item' item.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="item-button btn-primary">Claim Item</button>
+                                </form>
+                                {% endif %}
+                            {% else %}
+                            <a class="item-button btn-primary" href="{% url 'accounts:login' %}">Login to Claim</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </article>
+                {% empty %}
+                <p class="empty-state">No found items available for this filter.</p>
+                {% endfor %}
+            </section>
+            {% else %}
+            <section class="items-grid">
+                {% for item in lost_items %}
+                <article class="item-card">
+                    <div class="item-image">
+                        {% if item.image %}
+                        <img src="{{ item.image.url }}" alt="{{ item.item_name }}"/>
+                        {% else %}
+                        <div class="item-image-placeholder">
+                            <span class="material-symbols-outlined">image</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="item-content">
+                        <div class="item-header">
+                            <h3 class="item-title">{{ item.item_name }}</h3>
+                            <span class="item-category">{{ item.get_category_display }}</span>
+                        </div>
+                        <div class="item-details">
+                            <div class="detail-item">
+                                <span class="material-symbols-outlined detail-icon">location_on</span>
+                                <span>{{ item.get_location_lost_display }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="material-symbols-outlined detail-icon">calendar_today</span>
+                                <span>{{ item.date_lost|date:'M d, Y' }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="material-symbols-outlined detail-icon">person</span>
+                                <span>Reported by {{ item.searched_by.username }}</span>
+                            </div>
+                        </div>
+                        <p class="item-description">{{ item.description }}</p>
+                    </div>
+                </article>
+                {% empty %}
+                <p class="empty-state">No lost items available for this filter.</p>
+                {% endfor %}
+            </section>
+            {% endif %}
+        </div>
+    </main>
+    <script>
+        const toggle = document.getElementById('account-toggle');
+        const dropdown = document.getElementById('account-dropdown');
+        if (toggle && dropdown) {
+            toggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const open = dropdown.classList.toggle('open');
+                toggle.setAttribute('aria-expanded', open);
+            });
+            document.addEventListener('click', () => {
+                dropdown.classList.remove('open');
+                toggle.setAttribute('aria-expanded', 'false');
+            });
+            dropdown.addEventListener('click', (e) => e.stopPropagation());
+        }
+    </script>
+</body>
+</html>

@@ -23,15 +23,55 @@
             </div>
             <nav class="nav">
                 <a class="nav-link" href="{% url 'core:index' %}">Home</a>
-                <a class="nav-link" href="#">Search Item</a>
-                <a class="nav-link" href="#">Report Item</a>
-                <a class="nav-link" href="#">Listed Items</a>
+                <a class="nav-link" href="{% url 'core:search' %}">Search Item</a>
+                <a class="nav-link" href="{% url 'core:report' %}">Report Item</a>
+                <a class="nav-link" href="{% url 'core:listed-items' %}">Listed Items</a>
+                <a class="nav-link" href="{% url 'core:pending-complaints' %}">Pending Complaints</a>
             </nav>
             <div class="actions">
-                <a href="{% url 'accounts:logout' %}" class="logout-btn">
-                    <span class="material-symbols-outlined">logout</span>
-                    <span>Logout</span>
-                </a>
+                <button class="icon-btn">
+                    <span class="material-symbols-outlined">search</span>
+                </button>
+                <div class="account-menu">
+                    <button class="icon-btn account-btn" id="account-toggle" aria-expanded="false" aria-label="Account menu">
+                        <span class="material-symbols-outlined">account_circle</span>
+                    </button>
+                    <div class="dropdown" id="account-dropdown">
+                        {% if user.is_authenticated %}
+                        <div class="dropdown-header">
+                            <span class="dropdown-username">{{ user.username }}</span>
+                            <span class="dropdown-label">Signed in</span>
+                        </div>
+                        <a class="dropdown-item" href="{% url 'dashboard:index' %}">
+                            <span class="material-symbols-outlined">dashboard</span>
+                            My Dashboard
+                        </a>
+                        {% if user.is_staff or user.is_superuser %}
+                        <a class="dropdown-item" href="{% url 'admin-dashboard' %}">
+                            <span class="material-symbols-outlined">admin_panel_settings</span>
+                            Admin Dashboard
+                        </a>
+                        {% endif %}
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item dropdown-item-danger" href="{% url 'accounts:logout' %}">
+                            <span class="material-symbols-outlined">logout</span>
+                            Log Out
+                        </a>
+                        {% else %}
+                        <div class="dropdown-header">
+                            <span class="dropdown-label">Welcome to FINDIT</span>
+                        </div>
+                        <a class="dropdown-item" href="{% url 'accounts:login' %}">
+                            <span class="material-symbols-outlined">login</span>
+                            Log In
+                        </a>
+                        <a class="dropdown-item dropdown-item-primary" href="{% url 'accounts:signup' %}">
+                            <span class="material-symbols-outlined">person_add</span>
+                            Sign Up
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
     </header>
@@ -65,7 +105,7 @@
                     </div>
                     <div class="profile-info">
                         <h1 class="profile-name">
-                            {% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %}
+                            {{ profile.get_full_name }}
                         </h1>
                         <p class="profile-username">@{{ user.username }}</p>
                         {% if user.email %}
@@ -117,7 +157,7 @@
                                 Full Name
                             </span>
                             <span class="info-value">
-                                {% if user.get_full_name %}{{ user.get_full_name }}{% else %}<em class="no-value">Not set</em>{% endif %}
+                                {% if profile.full_name %}{{ profile.full_name }}{% else %}<em class="no-value">Not set</em>{% endif %}
                             </span>
                         </div>
                         <div class="info-row">
@@ -136,42 +176,6 @@
                                 {% if user.email %}{{ user.email }}{% else %}<em class="no-value">Not set</em>{% endif %}
                             </span>
                         </div>
-                        <div class="info-row">
-                            <span class="info-label">
-                                <span class="material-symbols-outlined">phone</span>
-                                Phone
-                            </span>
-                            <span class="info-value">
-                                {% if profile.phone_number %}{{ profile.phone_number }}{% else %}<em class="no-value">Not set</em>{% endif %}
-                            </span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">
-                                <span class="material-symbols-outlined">location_on</span>
-                                Address
-                            </span>
-                            <span class="info-value">
-                                {% if profile.address %}{{ profile.address }}{% else %}<em class="no-value">Not set</em>{% endif %}
-                            </span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">
-                                <span class="material-symbols-outlined">cake</span>
-                                Date of Birth
-                            </span>
-                            <span class="info-value">
-                                {% if profile.date_of_birth %}{{ profile.date_of_birth|date:"d M Y" }}{% else %}<em class="no-value">Not set</em>{% endif %}
-                            </span>
-                        </div>
-                        {% if profile.bio %}
-                        <div class="info-row info-row-bio">
-                            <span class="info-label">
-                                <span class="material-symbols-outlined">notes</span>
-                                Bio
-                            </span>
-                            <span class="info-value">{{ profile.bio }}</span>
-                        </div>
-                        {% endif %}
                     </div>
                 </div>
 
@@ -192,23 +196,22 @@
                         </div>
                         {% endif %}
 
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label" for="id_first_name">
-                                    <span class="material-symbols-outlined label-icon">badge</span>
-                                    First Name
-                                </label>
-                                {{ form.first_name }}
-                                {% if form.first_name.errors %}<span class="field-error">{{ form.first_name.errors|join:", " }}</span>{% endif %}
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="id_last_name">
-                                    <span class="material-symbols-outlined label-icon">badge</span>
-                                    Last Name
-                                </label>
-                                {{ form.last_name }}
-                                {% if form.last_name.errors %}<span class="field-error">{{ form.last_name.errors|join:", " }}</span>{% endif %}
-                            </div>
+                        <div class="form-group">
+                            <label class="form-label" for="id_full_name">
+                                <span class="material-symbols-outlined label-icon">badge</span>
+                                Full Name
+                            </label>
+                            {{ form.full_name }}
+                            {% if form.full_name.errors %}<span class="field-error">{{ form.full_name.errors|join:", " }}</span>{% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="id_username">
+                                <span class="material-symbols-outlined label-icon">alternate_email</span>
+                                Username
+                            </label>
+                            {{ form.username }}
+                            {% if form.username.errors %}<span class="field-error">{{ form.username.errors|join:", " }}</span>{% endif %}
                         </div>
 
                         <div class="form-group">
@@ -221,39 +224,30 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label" for="id_phone_number">
-                                <span class="material-symbols-outlined label-icon">phone</span>
-                                Phone Number
+                            <label class="form-label" for="id_current_password">
+                                <span class="material-symbols-outlined label-icon">lock</span>
+                                Current Password
                             </label>
-                            {{ form.phone_number }}
-                            {% if form.phone_number.errors %}<span class="field-error">{{ form.phone_number.errors|join:", " }}</span>{% endif %}
+                            {{ form.current_password }}
+                            {% if form.current_password.errors %}<span class="field-error">{{ form.current_password.errors|join:", " }}</span>{% endif %}
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label" for="id_address">
-                                <span class="material-symbols-outlined label-icon">location_on</span>
-                                Address
+                            <label class="form-label" for="id_new_password">
+                                <span class="material-symbols-outlined label-icon">vpn_key</span>
+                                New Password
                             </label>
-                            {{ form.address }}
-                            {% if form.address.errors %}<span class="field-error">{{ form.address.errors|join:", " }}</span>{% endif %}
+                            {{ form.new_password }}
+                            {% if form.new_password.errors %}<span class="field-error">{{ form.new_password.errors|join:", " }}</span>{% endif %}
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label" for="id_date_of_birth">
-                                <span class="material-symbols-outlined label-icon">cake</span>
-                                Date of Birth
+                            <label class="form-label" for="id_confirm_new_password">
+                                <span class="material-symbols-outlined label-icon">verified_user</span>
+                                Confirm New Password
                             </label>
-                            {{ form.date_of_birth }}
-                            {% if form.date_of_birth.errors %}<span class="field-error">{{ form.date_of_birth.errors|join:", " }}</span>{% endif %}
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="id_bio">
-                                <span class="material-symbols-outlined label-icon">notes</span>
-                                Bio
-                            </label>
-                            {{ form.bio }}
-                            {% if form.bio.errors %}<span class="field-error">{{ form.bio.errors|join:", " }}</span>{% endif %}
+                            {{ form.confirm_new_password }}
+                            {% if form.confirm_new_password.errors %}<span class="field-error">{{ form.confirm_new_password.errors|join:", " }}</span>{% endif %}
                         </div>
 
                         <div class="form-actions">
@@ -279,5 +273,21 @@
             <p class="copyright">© FINDIT: Lost and Found Management System. All rights reserved.</p>
         </div>
     </footer>
+    <script>
+        const toggle = document.getElementById('account-toggle');
+        const dropdown = document.getElementById('account-dropdown');
+        if (toggle && dropdown) {
+            toggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const open = dropdown.classList.toggle('open');
+                toggle.setAttribute('aria-expanded', open);
+            });
+            document.addEventListener('click', () => {
+                dropdown.classList.remove('open');
+                toggle.setAttribute('aria-expanded', 'false');
+            });
+            dropdown.addEventListener('click', (e) => e.stopPropagation());
+        }
+    </script>
 </body>
 </html>

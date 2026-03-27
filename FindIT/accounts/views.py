@@ -7,7 +7,7 @@ from .forms import SignupForm
 
 def signup_view(request):
     if request.user.is_authenticated:
-        return redirect('dashboard:index')
+        return redirect('core:index')
 
     form = SignupForm(request.POST or None)
     if request.method == 'POST':
@@ -17,27 +17,23 @@ def signup_view(request):
             password = form.cleaned_data['password']
             email = form.cleaned_data.get('email', '')
 
-            parts = full_name.split(' ', 1)
-            first_name = parts[0]
-            last_name = parts[1] if len(parts) > 1 else ''
-
             user = User.objects.create_user(
                 username=username,
                 password=password,
                 email=email,
-                first_name=first_name,
-                last_name=last_name,
             )
+            user.profile.full_name = full_name
+            user.profile.save(update_fields=['full_name'])
             login(request, user)
-            messages.success(request, f'Welcome to FINDIT, {first_name}!')
-            return redirect('dashboard:index')
+            messages.success(request, f'Welcome to FINDIT, {full_name or username}!')
+            return redirect('core:index')
 
     return render(request, 'accounts/signup.html', {'form': form})
 
 
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect('dashboard:index')
+        return redirect('core:index')
 
     error = None
     if request.method == 'POST':
@@ -47,7 +43,7 @@ def login_view(request):
         if user is not None:
             login(request, user)
             next_url = request.GET.get('next', '')
-            return redirect(next_url if next_url else 'dashboard:index')
+            return redirect(next_url if next_url else 'core:index')
         else:
             error = 'Invalid username or password. Please try again.'
 

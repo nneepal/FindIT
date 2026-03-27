@@ -1,0 +1,130 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Pending Complaints - FINDIT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="{% static 'core/pending_complaints.css' %}"/>
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <h1 class="logo-text">FINDIT</h1>
+            </div>
+            <nav class="nav">
+                <a class="nav-link" href="{% url 'core:index' %}">Home</a>
+                <a class="nav-link" href="{% url 'core:search' %}">Search Item</a>
+                <a class="nav-link" href="{% url 'core:report' %}">Report Item</a>
+                <a class="nav-link" href="{% url 'core:listed-items' %}">Listed Items</a>
+                <a class="nav-link active" href="{% url 'core:pending-complaints' %}">Pending Complaints</a>
+            </nav>
+            <div class="actions">
+                <button class="icon-btn">
+                    <span class="material-symbols-outlined">search</span>
+                </button>
+                <div class="account-menu">
+                    <button class="icon-btn account-btn" id="account-toggle" aria-expanded="false" aria-label="Account menu">
+                        <span class="material-symbols-outlined">account_circle</span>
+                    </button>
+                    <div class="dropdown" id="account-dropdown">
+                        {% if user.is_authenticated %}
+                        <div class="dropdown-header">
+                            <span class="dropdown-username">{{ user.username }}</span>
+                            <span class="dropdown-label">Signed in</span>
+                        </div>
+                        <a class="dropdown-item" href="{% url 'dashboard:index' %}">
+                            <span class="material-symbols-outlined">dashboard</span>
+                            My Dashboard
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item dropdown-item-danger" href="{% url 'accounts:logout' %}">
+                            <span class="material-symbols-outlined">logout</span>
+                            Log Out
+                        </a>
+                        {% else %}
+                        <div class="dropdown-header">
+                            <span class="dropdown-label">Welcome to FINDIT</span>
+                        </div>
+                        <a class="dropdown-item" href="{% url 'accounts:login' %}">
+                            <span class="material-symbols-outlined">login</span>
+                            Log In
+                        </a>
+                        <a class="dropdown-item dropdown-item-primary" href="{% url 'accounts:signup' %}">
+                            <span class="material-symbols-outlined">person_add</span>
+                            Sign Up
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section class="page-header">
+            <h1>Pending Complaints</h1>
+            <p>Claimed items are listed here for manual verification. Multiple users can claim the same item.</p>
+        </section>
+
+        <section class="items-grid">
+            {% for item in claimed_items %}
+            <article class="item-card">
+                <div class="item-image">
+                    {% if item.image %}
+                    <img src="{{ item.image.url }}" alt="{{ item.item_name }}"/>
+                    {% else %}
+                    <div class="item-image-placeholder">
+                        <span class="material-symbols-outlined">image</span>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="item-content">
+                    <div class="item-header">
+                        <h3>{{ item.item_name }}</h3>
+                        <span class="item-category">{{ item.get_category_display }}</span>
+                    </div>
+                    <div class="item-detail"><span class="material-symbols-outlined">location_on</span>{{ item.get_location_found_display }}</div>
+                    <div class="item-detail"><span class="material-symbols-outlined">calendar_today</span>{{ item.date_found|date:'M d, Y' }}</div>
+                    <div class="item-detail"><span class="material-symbols-outlined">person</span>Reported by {{ item.reported_by.username }}</div>
+
+                    <div class="claimants-block">
+                        <h4>Claimed By</h4>
+                        <ul>
+                            {% for claim in item.claims.all %}
+                            <li>{{ claim.claimed_by.username }} <span>({{ claim.created_at|date:'M d, Y H:i' }})</span></li>
+                            {% empty %}
+                            <li>No claims yet</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <button type="button" class="verify-btn">Verification</button>
+                </div>
+            </article>
+            {% empty %}
+            <p class="empty-state">No pending complaints yet. Claimed items will appear here.</p>
+            {% endfor %}
+        </section>
+    </main>
+    <script>
+        const toggle = document.getElementById('account-toggle');
+        const dropdown = document.getElementById('account-dropdown');
+        if (toggle && dropdown) {
+            toggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const open = dropdown.classList.toggle('open');
+                toggle.setAttribute('aria-expanded', open);
+            });
+            document.addEventListener('click', () => {
+                dropdown.classList.remove('open');
+                toggle.setAttribute('aria-expanded', 'false');
+            });
+            dropdown.addEventListener('click', (e) => e.stopPropagation());
+        }
+    </script>
+</body>
+</html>

@@ -13,6 +13,60 @@
     <link rel="stylesheet" href="{% static 'accounts/signup.css' %}"/>
 </head>
 <body>
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <h1 class="logo-text">FINDIT</h1>
+            </div>
+            <nav class="nav">
+                <a class="nav-link" href="{% url 'core:index' %}">Home</a>
+                <a class="nav-link" href="{% url 'core:search' %}">Search Item</a>
+                <a class="nav-link" href="{% url 'core:report' %}">Report Item</a>
+                <a class="nav-link" href="{% url 'core:listed-items' %}">Listed Items</a>
+                <a class="nav-link" href="{% url 'core:pending-complaints' %}">Pending Complaints</a>
+            </nav>
+            <div class="actions">
+                <button class="icon-btn">
+                    <span class="material-symbols-outlined">search</span>
+                </button>
+                <div class="account-menu">
+                    <button class="icon-btn account-btn" id="account-toggle" aria-expanded="false" aria-label="Account menu">
+                        <span class="material-symbols-outlined">account_circle</span>
+                    </button>
+                    <div class="dropdown" id="account-dropdown">
+                        {% if user.is_authenticated %}
+                        <div class="dropdown-header">
+                            <span class="dropdown-username">{{ user.username }}</span>
+                            <span class="dropdown-label">Signed in</span>
+                        </div>
+                        <a class="dropdown-item" href="{% url 'dashboard:index' %}">
+                            <span class="material-symbols-outlined">dashboard</span>
+                            My Dashboard
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item dropdown-item-danger" href="{% url 'accounts:logout' %}">
+                            <span class="material-symbols-outlined">logout</span>
+                            Log Out
+                        </a>
+                        {% else %}
+                        <div class="dropdown-header">
+                            <span class="dropdown-label">Welcome to FINDIT</span>
+                        </div>
+                        <a class="dropdown-item" href="{% url 'accounts:login' %}">
+                            <span class="material-symbols-outlined">login</span>
+                            Log In
+                        </a>
+                        <a class="dropdown-item dropdown-item-primary" href="{% url 'accounts:signup' %}">
+                            <span class="material-symbols-outlined">person_add</span>
+                            Sign Up
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
     <div class="signup-container">
         <div class="signup-card">
             <div class="card-accent"></div>
@@ -135,5 +189,20 @@
             }
         }
     </script>
+        const toggle = document.getElementById('account-toggle');
+        const dropdown = document.getElementById('account-dropdown');
+        if (toggle && dropdown) {
+            toggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const open = dropdown.classList.toggle('open');
+                toggle.setAttribute('aria-expanded', open);
+            });
+            document.addEventListener('click', () => {
+                dropdown.classList.remove('open');
+                toggle.setAttribute('aria-expanded', 'false');
+            });
+            dropdown.addEventListener('click', (e) => e.stopPropagation());
+        }
+
 </body>
 </html>

@@ -1,0 +1,317 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>FINDIT - Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="{% static 'dashboard/admin.css' %}"/>
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <h1 class="logo-text">FINDIT</h1>
+            </div>
+            <nav class="nav">
+                <a class="nav-link" href="{% url 'core:index' %}">Home</a>
+                <a class="nav-link" href="{% url 'core:search' %}">Search Item</a>
+                <a class="nav-link" href="{% url 'core:report' %}">Report Item</a>
+                <a class="nav-link" href="{% url 'core:listed-items' %}">Listed Items</a>
+                <a class="nav-link" href="{% url 'core:pending-complaints' %}">Pending Complaints</a>
+            </nav>
+            <div class="actions">
+                <button class="icon-btn">
+                    <span class="material-symbols-outlined">search</span>
+                </button>
+                <div class="account-menu">
+                    <button class="icon-btn account-btn" id="account-toggle" aria-expanded="false" aria-label="Account menu">
+                        <span class="material-symbols-outlined">account_circle</span>
+                    </button>
+                    <div class="dropdown" id="account-dropdown">
+                        {% if user.is_authenticated %}
+                        <div class="dropdown-header">
+                            <span class="dropdown-username">{{ user.username }}</span>
+                            <span class="dropdown-label">Signed in</span>
+                        </div>
+                        <a class="dropdown-item" href="{% url 'dashboard:index' %}">
+                            <span class="material-symbols-outlined">dashboard</span>
+                            My Dashboard
+                        </a>
+                        {% if user.is_staff or user.is_superuser %}
+                        <a class="dropdown-item" href="{% url 'admin-dashboard' %}">
+                            <span class="material-symbols-outlined">admin_panel_settings</span>
+                            Admin Dashboard
+                        </a>
+                        {% endif %}
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item dropdown-item-danger" href="{% url 'accounts:logout' %}">
+                            <span class="material-symbols-outlined">logout</span>
+                            Log Out
+                        </a>
+                        {% else %}
+                        <div class="dropdown-header">
+                            <span class="dropdown-label">Welcome to FINDIT</span>
+                        </div>
+                        <a class="dropdown-item" href="{% url 'accounts:login' %}">
+                            <span class="material-symbols-outlined">login</span>
+                            Log In
+                        </a>
+                        <a class="dropdown-item dropdown-item-primary" href="{% url 'accounts:signup' %}">
+                            <span class="material-symbols-outlined">person_add</span>
+                            Sign Up
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="content-wrapper">
+            {% if messages %}
+                <section class="alerts">
+                    {% for message in messages %}
+                        <p class="alert-message">{{ message }}</p>
+                    {% endfor %}
+                </section>
+            {% endif %}
+
+            <section class="profile-card">
+                <div class="profile-avatar">
+                    <img alt="Admin Profile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAn1f7LpT6WUTbsmM2-NP29Al4d7xQ_QtbFrVKqLeSDE_MyKREn4VflCM9hm9sF_fr1u0lWuZCiYeuZPPMWzlsnuvai61KuOHI_RksKAXroeHvb_IPQqtN3g-RbLVQBVAKHb-ws1WHnKzUH9qVXY8D99BY_5H-VRkP7PDfrSoAIwjaSPFZEkLej1rRRhWMplsNTgqd4fj3Au-aAbbofp_JuNkItevtpJd1T4Md_TLJcG3HVc70G1oGYLaWKS8lXBHAap_n76oMmA0"/>
+                    <div class="status-indicator"></div>
+                </div>
+                <div class="profile-info">
+                    <h1 class="profile-name">{{ request.user.get_full_name|default:request.user.username }}</h1>
+                    <p class="profile-role">System Administrator</p>
+                    <div class="profile-email">
+                        <span class="material-symbols-outlined">mail</span>
+                        {{ request.user.email|default:"No email" }}
+                    </div>
+                </div>
+            </section>
+
+            <section class="stats-grid" id="stats-grid">
+                <div class="stat-card">
+                    <p class="stat-label">Total Listed Items</p>
+                    <p class="stat-value" data-stat="total_listed_items">{{ stats.total_listed_items }}</p>
+                </div>
+                <div class="stat-card">
+                    <p class="stat-label">Found Reports</p>
+                    <p class="stat-value" data-stat="found_reports">{{ stats.found_reports }}</p>
+                </div>
+                <div class="stat-card">
+                    <p class="stat-label">Lost Reports</p>
+                    <p class="stat-value" data-stat="lost_reports">{{ stats.lost_reports }}</p>
+                </div>
+                <div class="stat-card">
+                    <p class="stat-label">Active Users / Recovery Rate</p>
+                    <p class="stat-value">
+                        <span data-stat="active_users">{{ stats.active_users }}</span>
+                        /
+                        <span data-stat="recovery_rate">{{ stats.recovery_rate }}</span>
+                    </p>
+                </div>
+            </section>
+
+            <section class="tables-grid">
+                <section class="table-section">
+                    <div class="table-header">
+                        <div>
+                            <h2 class="table-title">User Management</h2>
+                            <p class="table-subtitle">Manage users and access levels</p>
+                        </div>
+                        <form class="search-wrapper" method="get">
+                            <span class="material-symbols-outlined search-icon">search</span>
+                            <input class="search-input" name="user_q" placeholder="Search users..." type="text" value="{{ user_query }}"/>
+                        </form>
+                    </div>
+
+                    <form class="inline-form" method="post" action="{% url 'admin-dashboard' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="add_user"/>
+                        <input class="search-input" name="username" placeholder="Username" required type="text"/>
+                        <input class="search-input" name="full_name" placeholder="Full name" type="text"/>
+                        <input class="search-input" name="email" placeholder="Email" type="email"/>
+                        <input class="search-input" name="password" placeholder="Password" required type="password"/>
+                        <label class="check-label">
+                            <input type="checkbox" name="is_staff"/>
+                            Admin
+                        </label>
+                        <button class="btn-add" type="submit">
+                            <span class="material-symbols-outlined">person_add</span>
+                            Add User
+                        </button>
+                    </form>
+
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user_obj in users %}
+                                    <tr>
+                                        <td>{{ user_obj.username }}</td>
+                                        <td>{{ user_obj.profile.get_full_name }}</td>
+                                        <td>{{ user_obj.email|default:"-" }}</td>
+                                        <td>
+                                            <form method="post" action="{% url 'admin-dashboard' %}">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="delete_user"/>
+                                                <input type="hidden" name="user_id" value="{{ user_obj.id }}"/>
+                                                <button class="btn-action btn-delete-action" type="submit">Delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="4">No users found.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="table-footer">
+                        <p class="table-info">Showing {{ users|length }} users</p>
+                    </div>
+                </section>
+
+                <section class="table-section">
+                    <div class="table-header">
+                        <div>
+                            <h2 class="table-title">Managed Items</h2>
+                            <p class="table-subtitle">Quick list with minimal details</p>
+                        </div>
+                        <form class="search-wrapper" method="get">
+                            <span class="material-symbols-outlined search-icon">search</span>
+                            <input class="search-input" name="item_q" placeholder="Search items..." type="text" value="{{ item_query }}"/>
+                        </form>
+                    </div>
+
+                    <form class="inline-form" method="post" action="{% url 'admin-dashboard' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="add_item"/>
+                        <input class="search-input" name="title" placeholder="Item title" required type="text"/>
+                        <input class="search-input" name="category" placeholder="Category" required type="text"/>
+                        <input class="search-input" name="location" placeholder="Location" required type="text"/>
+                        <button class="btn-add" type="submit">
+                            <span class="material-symbols-outlined">add</span>
+                            Add Item
+                        </button>
+                    </form>
+
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Category</th>
+                                    <th>Location</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in managed_items %}
+                                    <tr>
+                                        <td>{{ item.title }}</td>
+                                        <td>{{ item.category }}</td>
+                                        <td>{{ item.location }}</td>
+                                        <td>
+                                            <form method="post" action="{% url 'admin-dashboard' %}">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="delete_item"/>
+                                                <input type="hidden" name="item_id" value="{{ item.id }}"/>
+                                                <button class="btn-action btn-delete-action" type="submit">Delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="4">No managed items found.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="table-footer">
+                        <p class="table-info">Showing {{ managed_items|length }} items</p>
+                    </div>
+                </section>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-top">
+                <div class="footer-logo">
+                    <span class="material-symbols-outlined footer-logo-icon">find_in_page</span>
+                    <span class="footer-logo-text">FINDIT</span>
+                </div>
+                <div class="footer-links">
+                    <a class="footer-link" href="#">Contact Us</a>
+                    <a class="footer-link" href="#">Privacy Policy</a>
+                    <a class="footer-link" href="#">Terms of Service</a>
+                    <a class="footer-link" href="#">Help Center</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p class="copyright">© 2026 FINDIT Management System. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const toggle = document.getElementById('account-toggle');
+        const dropdown = document.getElementById('account-dropdown');
+        if (toggle && dropdown) {
+            toggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const open = dropdown.classList.toggle('open');
+                toggle.setAttribute('aria-expanded', open);
+            });
+            document.addEventListener('click', () => {
+                dropdown.classList.remove('open');
+                toggle.setAttribute('aria-expanded', 'false');
+            });
+            dropdown.addEventListener('click', (e) => e.stopPropagation());
+        }
+
+        const statsUrl = "{% url 'admin-stats' %}";
+
+        async function refreshStats() {
+            try {
+                const response = await fetch(statsUrl, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                if (!response.ok) {
+                    return;
+                }
+                const data = await response.json();
+                document.querySelectorAll('[data-stat]').forEach((element) => {
+                    const key = element.getAttribute('data-stat');
+                    if (Object.prototype.hasOwnProperty.call(data, key)) {
+                        element.textContent = data[key];
+                    }
+                });
+            } catch (error) {
+                console.error('Could not refresh stats', error);
+            }
+        }
+
+        setInterval(refreshStats, 10000);
+    </script>
+</body>
+</html>
