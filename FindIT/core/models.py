@@ -123,6 +123,7 @@ class ClaimVerification(models.Model):
 		('unverified', 'Unverified'),
 		('verified', 'Verified'),
 		('rejected', 'Rejected'),
+		('closed', 'Closed'),
 	]
 
 	claim = models.OneToOneField(FoundItemClaim, on_delete=models.CASCADE, related_name='verification')

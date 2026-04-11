@@ -190,24 +190,47 @@
                 <section class="table-section">
                     <div class="table-header">
                         <div>
-                            <h2 class="table-title">Managed Items</h2>
-                            <p class="table-subtitle">Quick list with minimal details</p>
+                            <h2 class="table-title">Manage Found Items</h2>
+                            <p class="table-subtitle">Connected directly to found_items table</p>
                         </div>
                         <form class="search-wrapper" method="get">
                             <span class="material-symbols-outlined search-icon">search</span>
-                            <input class="search-input" name="item_q" placeholder="Search items..." type="text" value="{{ item_query }}"/>
+                            <input class="search-input" name="found_q" placeholder="Search found items..." type="text" value="{{ found_query }}"/>
                         </form>
                     </div>
 
-                    <form class="inline-form" method="post" action="{% url 'admin-dashboard' %}">
+                    <form class="inline-form" method="post" action="{% url 'admin-dashboard' %}" enctype="multipart/form-data">
                         {% csrf_token %}
-                        <input type="hidden" name="action" value="add_item"/>
-                        <input class="search-input" name="title" placeholder="Item title" required type="text"/>
-                        <input class="search-input" name="category" placeholder="Category" required type="text"/>
-                        <input class="search-input" name="location" placeholder="Location" required type="text"/>
+                        <input type="hidden" name="action" value="add_found_item"/>
+                        <input class="search-input" name="item_name" placeholder="Item name" required type="text"/>
+                        <select class="search-input" name="category" required>
+                            <option value="">Category</option>
+                            {% for key, label in found_category_choices %}
+                            <option value="{{ key }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        <select class="search-input" name="location_found" required>
+                            <option value="">Location found</option>
+                            {% for key, label in found_location_choices %}
+                            <option value="{{ key }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        <select class="search-input" name="condition" required>
+                            <option value="">Condition</option>
+                            {% for key, label in found_condition_choices %}
+                            <option value="{{ key }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        <input class="search-input" name="date_found" required type="date"/>
+                        <input class="search-input" name="image" required type="file" accept=".jpg,.jpeg,.png,image/png,image/jpeg"/>
+                        <label class="check-label">
+                            <input type="checkbox" name="is_valuable"/>
+                            Valuable Item
+                        </label>
+                        <input class="search-input item-full-width" name="description" placeholder="Description" required type="text"/>
                         <button class="btn-add" type="submit">
                             <span class="material-symbols-outlined">add</span>
-                            Add Item
+                            Add Found Item
                         </button>
                     </form>
 
@@ -215,22 +238,26 @@
                         <table class="data-table">
                             <thead>
                                 <tr>
-                                    <th>Title</th>
+                                    <th>Item</th>
                                     <th>Category</th>
                                     <th>Location</th>
+                                    <th>Reporter</th>
+                                    <th>Claim Status</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for item in managed_items %}
+                                {% for item in found_items %}
                                     <tr>
-                                        <td>{{ item.title }}</td>
-                                        <td>{{ item.category }}</td>
-                                        <td>{{ item.location }}</td>
+                                        <td>{{ item.item_name }}</td>
+                                        <td>{{ item.get_category_display }}</td>
+                                        <td>{{ item.get_location_found_display }}</td>
+                                        <td>{{ item.reported_by.username }}</td>
+                                        <td>{{ item.get_claim_status_display }}</td>
                                         <td>
                                             <form method="post" action="{% url 'admin-dashboard' %}">
                                                 {% csrf_token %}
-                                                <input type="hidden" name="action" value="delete_item"/>
+                                                <input type="hidden" name="action" value="delete_found_item"/>
                                                 <input type="hidden" name="item_id" value="{{ item.id }}"/>
                                                 <button class="btn-action btn-delete-action" type="submit">Delete</button>
                                             </form>
@@ -238,7 +265,7 @@
                                     </tr>
                                 {% empty %}
                                     <tr>
-                                        <td colspan="4">No managed items found.</td>
+                                        <td colspan="6">No found items found.</td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
@@ -246,7 +273,141 @@
                     </div>
 
                     <div class="table-footer">
-                        <p class="table-info">Showing {{ managed_items|length }} items</p>
+                        <p class="table-info">Showing {{ found_items|length }} found items</p>
+                    </div>
+                </section>
+
+                <section class="table-section">
+                    <div class="table-header">
+                        <div>
+                            <h2 class="table-title">Manage Lost Items</h2>
+                            <p class="table-subtitle">Connected directly to lost_items table</p>
+                        </div>
+                        <form class="search-wrapper" method="get">
+                            <span class="material-symbols-outlined search-icon">search</span>
+                            <input class="search-input" name="lost_q" placeholder="Search lost items..." type="text" value="{{ lost_query }}"/>
+                        </form>
+                    </div>
+
+                    <form class="inline-form" method="post" action="{% url 'admin-dashboard' %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="add_lost_item"/>
+                        <input class="search-input" name="item_name" placeholder="Item name" required type="text"/>
+                        <select class="search-input" name="category" required>
+                            <option value="">Category</option>
+                            {% for key, label in lost_category_choices %}
+                            <option value="{{ key }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        <select class="search-input" name="condition" required>
+                            <option value="">Condition</option>
+                            {% for key, label in lost_condition_choices %}
+                            <option value="{{ key }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        <select class="search-input" name="location_lost" required>
+                            <option value="">Location lost</option>
+                            {% for key, label in lost_location_choices %}
+                            <option value="{{ key }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        <input class="search-input" name="date_lost" required type="date"/>
+                        <input class="search-input" name="image" required type="file" accept=".jpg,.jpeg,.png,image/png,image/jpeg"/>
+                        <input class="search-input item-full-width" name="description" placeholder="Description" required type="text"/>
+                        <button class="btn-add" type="submit">
+                            <span class="material-symbols-outlined">add</span>
+                            Add Lost Item
+                        </button>
+                    </form>
+
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Category</th>
+                                    <th>Location</th>
+                                    <th>Reported By</th>
+                                    <th>Claim Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in lost_items %}
+                                    <tr>
+                                        <td>{{ item.item_name }}</td>
+                                        <td>{{ item.get_category_display }}</td>
+                                        <td>{{ item.get_location_lost_display }}</td>
+                                        <td>{{ item.searched_by.username }}</td>
+                                        <td>{{ item.get_claim_status_display }}</td>
+                                        <td>
+                                            <form method="post" action="{% url 'admin-dashboard' %}">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="delete_lost_item"/>
+                                                <input type="hidden" name="item_id" value="{{ item.id }}"/>
+                                                <button class="btn-action btn-delete-action" type="submit">Delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="6">No lost items found.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="table-footer">
+                        <p class="table-info">Showing {{ lost_items|length }} lost items</p>
+                    </div>
+                </section>
+
+                <section class="table-section verification-section">
+                    <div class="table-header">
+                        <div>
+                            <h2 class="table-title">Pending Complaints / Claimed Items</h2>
+                            <p class="table-subtitle">Close complaints directly once the item is returned or the complaint must be closed</p>
+                        </div>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table class="data-table verification-table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Claimant</th>
+                                    <th>Submitted</th>
+                                    <th>Current Status</th>
+                                    <th>Close Complaint</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for complaint in pending_complaints %}
+                                    <tr>
+                                        <td>{{ complaint.found_item.item_name }}</td>
+                                        <td>{{ complaint.claimed_by.username }}</td>
+                                        <td>{{ complaint.submitted_at|date:'M d, Y H:i' }}</td>
+                                        <td>
+                                            <span class="verification-status status-{{ complaint.status }}">{{ complaint.get_status_display }}</span>
+                                        </td>
+                                        <td>
+                                            <form method="post" action="{% url 'admin-dashboard' %}" class="verification-form-inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="close_complaint"/>
+                                                <input type="hidden" name="verification_id" value="{{ complaint.id }}"/>
+                                                <textarea name="close_note" class="admin-message-input" placeholder="Reason for closing complaint"></textarea>
+                                                <button type="submit" class="btn-action btn-close">Close Complaint</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="5">No pending complaints available.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </section>
 

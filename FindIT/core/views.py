@@ -140,7 +140,11 @@ def claim_found_item(request, item_id):
 def pending_complaints(request):
     verification_status_subquery = ClaimVerification.objects.filter(claim_id=OuterRef('pk')).values('status')[:1]
 
-    claimed_items = FoundItem.objects.filter(claim_status='claimed').prefetch_related(
+    claimed_items = FoundItem.objects.filter(
+        claim_status='claimed',
+    ).filter(
+        Q(claims__verification__isnull=True) | ~Q(claims__verification__status='closed')
+    ).distinct().prefetch_related(
         Prefetch(
             'claims',
             queryset=FoundItemClaim.objects.select_related('claimed_by').annotate(
@@ -149,7 +153,7 @@ def pending_complaints(request):
                     Value('unverified'),
                     output_field=CharField(),
                 )
-            ).order_by('-created_at'),
+            ).exclude(verification__status='closed').order_by('-created_at'),
         )
     ).order_by('-updated_at')
 

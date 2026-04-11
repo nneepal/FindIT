@@ -498,6 +498,10 @@ body {
     border-bottom-color: #334155;
 }
 
+.item-full-width {
+    grid-column: 1 / -1;
+}
+
 .check-label {
     display: inline-flex;
     align-items: center;
@@ -792,6 +796,10 @@ body {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
+    .item-full-width {
+        grid-column: 1 / -1;
+    }
+
     .footer-top {
         flex-direction: row;
     }
@@ -820,6 +828,10 @@ body {
 
     .inline-form {
         grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .item-full-width {
+        grid-column: span 2;
     }
 
     .footer-container {
@@ -956,6 +968,11 @@ body {
     color: #8c2d2d;
 }
 
+.status-closed {
+    background: #e2e8f0;
+    color: #334155;
+}
+
 .verification-form-inline {
     display: grid;
     gap: 8px;
@@ -991,4 +1008,15 @@ body {
 
 .btn-verify:hover {
     background-color: #286c32;
+}
+
+.btn-close {
+    background-color: #475569;
+    color: #ffffff;
+    border-color: #475569;
+}
+
+.btn-close:hover {
+    background-color: #334155;
+    border-color: #334155;
 }
