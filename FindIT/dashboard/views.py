@@ -1,6 +1,7 @@
 from functools import wraps
 
 from django.contrib.auth.models import User
+from django.utils import timezone
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
@@ -9,7 +10,7 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
 from accounts.forms import ProfileUpdateForm
 from accounts.models import UserProfile
-from core.models import FoundItem, LostItem
+from core.models import ClaimVerification, FoundItem, FoundItemClaim, LostItem
 
 from .forms import AdminManagedItemForm
 from .models import AdminManagedItem
@@ -33,9 +34,17 @@ def dashboard_view(request):
     else:
         form = ProfileUpdateForm(user=user, profile=profile)
 
+    claimed_items = FoundItemClaim.objects.filter(claimed_by=user).select_related('found_item').order_by('-created_at')
+    verification_requests = ClaimVerification.objects.filter(claimed_by=user).select_related(
+        'found_item',
+        'claim',
+    ).order_by('-submitted_at')
+
     return render(request, 'dashboard/dashboard.html', {
         'form': form,
         'profile': profile,
+        'claimed_items': claimed_items,
+        'verification_requests': verification_requests,
     })
 
 
@@ -123,6 +132,27 @@ def admin_dashboard_view(request):
                 return redirect('admin-dashboard')
             messages.error(request, 'Managed item not found.')
 
+        elif action == 'review_verification':
+            verification_id = request.POST.get('verification_id')
+            decision = request.POST.get('decision', '').strip()
+            admin_message = request.POST.get('admin_message', '').strip()
+
+            try:
+                verification = ClaimVerification.objects.select_related('found_item').get(pk=verification_id)
+            except ClaimVerification.DoesNotExist:
+                messages.error(request, 'Verification request not found.')
+            else:
+                if decision not in {'verified', 'rejected'}:
+                    messages.error(request, 'Invalid verification decision.')
+                else:
+                    verification.status = decision
+                    verification.admin_message = admin_message
+                    verification.reviewed_by = request.user
+                    verification.reviewed_at = timezone.now()
+                    verification.save(update_fields=['status', 'admin_message', 'reviewed_by', 'reviewed_at', 'updated_at'])
+                    messages.success(request, f'Verification request marked as {decision}.')
+                    return redirect('admin-dashboard')
+
     user_query = request.GET.get('user_q', '').strip()
     item_query = request.GET.get('item_q', '').strip()
 
@@ -146,10 +176,17 @@ def admin_dashboard_view(request):
             | Q(location__icontains=item_query)
         )
 
+    verifications = ClaimVerification.objects.select_related(
+        'found_item',
+        'claimed_by',
+        'reviewed_by',
+    ).order_by('status', '-submitted_at')
+
     context = {
         'stats': _get_admin_stats(),
         'users': users,
         'managed_items': managed_items,
+        'verifications': verifications,
         'user_query': user_query,
         'item_query': item_query,
         'item_form': AdminManagedItemForm(),

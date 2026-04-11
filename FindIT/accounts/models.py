@@ -19,6 +19,22 @@ class UserProfile(models.Model):
         return self.full_name.strip() or self.user.username
 
 
+class PasswordResetRequest(models.Model):
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='password_reset_requests')
+    email = models.EmailField()
+    sent_successfully = models.BooleanField(default=False)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.CharField(max_length=255, blank=True)
+    requested_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'password_reset_requests'
+        ordering = ['-requested_at']
+
+    def __str__(self):
+        return f'Password reset for {self.email} at {self.requested_at:%Y-%m-%d %H:%M:%S}'
+
+
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:

@@ -70,6 +70,14 @@
             <p>Claimed items are listed here for manual verification. Multiple users can claim the same item.</p>
         </section>
 
+        {% if messages %}
+        <section class="messages-container">
+            {% for message in messages %}
+            <p class="message message-{{ message.tags }}">{{ message }}</p>
+            {% endfor %}
+        </section>
+        {% endif %}
+
         <section class="items-grid">
             {% for item in claimed_items %}
             <article class="item-card">
@@ -95,14 +103,30 @@
                         <h4>Claimed By</h4>
                         <ul>
                             {% for claim in item.claims.all %}
-                            <li>{{ claim.claimed_by.username }} <span>({{ claim.created_at|date:'M d, Y H:i' }})</span></li>
+                            <li>
+                                <div class="claim-row">
+                                    <span>{{ claim.claimed_by.username }} <span>({{ claim.created_at|date:'M d, Y H:i' }})</span></span>
+                                    {% if claim.id in user_claim_ids %}
+                                    <span class="verification-status status-{{ claim.verification_status }}">{{ claim.verification_status|title }}</span>
+                                    {% endif %}
+                                </div>
+                                {% if claim.id in user_claim_ids %}
+                                <div class="claim-actions">
+                                    <a href="{% url 'core:verify-claim' claim.id %}" class="verify-btn">
+                                        {% if claim.verification_status == 'unverified' %}
+                                            Verification
+                                        {% else %}
+                                            Update Verification
+                                        {% endif %}
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </li>
                             {% empty %}
                             <li>No claims yet</li>
                             {% endfor %}
                         </ul>
                     </div>
-
-                    <button type="button" class="verify-btn">Verification</button>
                 </div>
             </article>
             {% empty %}

@@ -1,12 +1,13 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Prefetch, Q
+from django.db.models import CharField, OuterRef, Prefetch, Q, Subquery, Value
+from django.db.models.functions import Coalesce
 from django.http import HttpResponseNotAllowed
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect, render
 
-from .models import FoundItem, FoundItemClaim, LostItem
-from .forms import FoundItemReportForm, LostItemSearchForm
+from .forms import ClaimVerificationForm, FoundItemReportForm, LostItemSearchForm
+from .models import ClaimVerification, FoundItem, FoundItemClaim, LostItem
 
 
 def index(request):
@@ -137,14 +138,63 @@ def claim_found_item(request, item_id):
 
 @login_required
 def pending_complaints(request):
+    verification_status_subquery = ClaimVerification.objects.filter(claim_id=OuterRef('pk')).values('status')[:1]
+
     claimed_items = FoundItem.objects.filter(claim_status='claimed').prefetch_related(
         Prefetch(
             'claims',
-            queryset=FoundItemClaim.objects.select_related('claimed_by').order_by('-created_at'),
+            queryset=FoundItemClaim.objects.select_related('claimed_by').annotate(
+                verification_status=Coalesce(
+                    Subquery(verification_status_subquery),
+                    Value('unverified'),
+                    output_field=CharField(),
+                )
+            ).order_by('-created_at'),
         )
     ).order_by('-updated_at')
 
+    user_claim_ids = set(
+        FoundItemClaim.objects.filter(claimed_by=request.user).values_list('id', flat=True)
+    )
+
     context = {
         'claimed_items': claimed_items,
+        'user_claim_ids': user_claim_ids,
     }
     return render(request, 'core/pending_complaints.html', context)
+
+
+@login_required
+def verify_claim(request, claim_id):
+    claim = get_object_or_404(
+        FoundItemClaim.objects.select_related('found_item', 'claimed_by'),
+        pk=claim_id,
+        claimed_by=request.user,
+    )
+
+    verification_instance = getattr(claim, 'verification', None)
+
+    if request.method == 'POST':
+        form = ClaimVerificationForm(request.POST, request.FILES, instance=verification_instance)
+        if form.is_valid():
+            verification = form.save(commit=False)
+            verification.claim = claim
+            verification.found_item = claim.found_item
+            verification.claimed_by = request.user
+            verification.status = 'unverified'
+            verification.admin_message = ''
+            verification.reviewed_by = None
+            verification.reviewed_at = None
+            verification.save()
+            messages.success(request, 'Verification details submitted and sent to admin dashboard.')
+            return redirect('core:pending-complaints')
+        messages.error(request, 'Please fix the errors and submit the verification form again.')
+    else:
+        form = ClaimVerificationForm(instance=verification_instance)
+
+    context = {
+        'form': form,
+        'claim': claim,
+        'verification': verification_instance,
+    }
+    return render(request, 'core/claim_verification_form.html', context)

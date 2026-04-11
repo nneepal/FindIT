@@ -908,3 +908,87 @@ body {
     height: 1px;
     background-color: #f3f4f6;
 }
+
+.verification-section {
+    grid-column: 1 / -1;
+}
+
+.verification-table {
+    min-width: 980px;
+}
+
+.verification-description {
+    max-width: 260px;
+    white-space: normal;
+    line-height: 1.45;
+}
+
+.proof-link {
+    color: var(--color-primary-dark);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.proof-link:hover {
+    text-decoration: underline;
+}
+
+.verification-status {
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.status-unverified {
+    background: #fff4d8;
+    color: #835400;
+}
+
+.status-verified {
+    background: #e4f6e8;
+    color: #1f5f2d;
+}
+
+.status-rejected {
+    background: #fce8e8;
+    color: #8c2d2d;
+}
+
+.verification-form-inline {
+    display: grid;
+    gap: 8px;
+}
+
+.admin-message-input {
+    width: 100%;
+    min-height: 64px;
+    resize: vertical;
+    border: 1px solid #d7e0d4;
+    border-radius: 6px;
+    font-size: 13px;
+    padding: 8px;
+    font-family: 'Inter', sans-serif;
+}
+
+.admin-message-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+.verification-form-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn-verify {
+    background-color: #2f7d3a;
+    color: #ffffff;
+}
+
+.btn-verify:hover {
+    background-color: #286c32;
+}

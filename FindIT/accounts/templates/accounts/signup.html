@@ -118,10 +118,10 @@
 
                     <!-- Email Field -->
                     <label class="form-label">
-                        <span class="label-text">Email <span class="optional-label">(optional)</span></span>
+                        <span class="label-text">Email</span>
                         <div class="input-group">
                             <span class="material-symbols-outlined input-icon">mail</span>
-                            <input class="form-input{% if form.email.errors %} input-error{% endif %}" name="email" placeholder="Enter email address" type="email" value="{{ form.email.value|default:'' }}"/>
+                            <input class="form-input{% if form.email.errors %} input-error{% endif %}" name="email" placeholder="Enter email address" type="email" required value="{{ form.email.value|default:'' }}"/>
                         </div>
                         {% if form.email.errors %}<span class="field-error">{{ form.email.errors|join:", " }}</span>{% endif %}
                     </label>

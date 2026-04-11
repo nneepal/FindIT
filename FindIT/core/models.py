@@ -116,3 +116,36 @@ class FoundItemClaim(models.Model):
 
 	def __str__(self):
 		return f'{self.found_item.item_name} claimed by {self.claimed_by.username}'
+
+
+class ClaimVerification(models.Model):
+	VERIFICATION_STATUS_CHOICES = [
+		('unverified', 'Unverified'),
+		('verified', 'Verified'),
+		('rejected', 'Rejected'),
+	]
+
+	claim = models.OneToOneField(FoundItemClaim, on_delete=models.CASCADE, related_name='verification')
+	found_item = models.ForeignKey(FoundItem, on_delete=models.CASCADE, related_name='verifications')
+	claimed_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='claim_verifications')
+	description = models.TextField()
+	proof_image = models.FileField(upload_to='claim_verifications/', blank=True, null=True)
+	status = models.CharField(max_length=20, choices=VERIFICATION_STATUS_CHOICES, default='unverified')
+	admin_message = models.TextField(blank=True)
+	reviewed_by = models.ForeignKey(
+		User,
+		on_delete=models.SET_NULL,
+		null=True,
+		blank=True,
+		related_name='reviewed_claim_verifications',
+	)
+	reviewed_at = models.DateTimeField(blank=True, null=True)
+	submitted_at = models.DateTimeField(auto_now_add=True)
+	updated_at = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		db_table = 'claim_verification'
+		ordering = ['-submitted_at']
+
+	def __str__(self):
+		return f'Verification for {self.found_item.item_name} by {self.claimed_by.username}'

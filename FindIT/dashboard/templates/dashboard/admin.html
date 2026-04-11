@@ -249,6 +249,65 @@
                         <p class="table-info">Showing {{ managed_items|length }} items</p>
                     </div>
                 </section>
+
+                <section class="table-section verification-section">
+                    <div class="table-header">
+                        <div>
+                            <h2 class="table-title">Claim Verification Requests</h2>
+                            <p class="table-subtitle">Review claimant description, optional proof image, and decide verification status</p>
+                        </div>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table class="data-table verification-table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Claimant</th>
+                                    <th>Description</th>
+                                    <th>Proof</th>
+                                    <th>Status</th>
+                                    <th>Review</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for verification in verifications %}
+                                    <tr>
+                                        <td>{{ verification.found_item.item_name }}</td>
+                                        <td>{{ verification.claimed_by.username }}</td>
+                                        <td class="verification-description">{{ verification.description }}</td>
+                                        <td>
+                                            {% if verification.proof_image %}
+                                            <a href="{{ verification.proof_image.url }}" target="_blank" rel="noopener" class="proof-link">View Proof</a>
+                                            {% else %}
+                                            -
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="verification-status status-{{ verification.status }}">{{ verification.get_status_display }}</span>
+                                        </td>
+                                        <td>
+                                            <form method="post" action="{% url 'admin-dashboard' %}" class="verification-form-inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="review_verification"/>
+                                                <input type="hidden" name="verification_id" value="{{ verification.id }}"/>
+                                                <textarea name="admin_message" class="admin-message-input" placeholder="Reason or message for claimant">{{ verification.admin_message }}</textarea>
+                                                <div class="verification-form-actions">
+                                                    <button type="submit" name="decision" value="verified" class="btn-action btn-verify">Verify</button>
+                                                    <button type="submit" name="decision" value="rejected" class="btn-action btn-delete-action">Reject</button>
+                                                </div>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="6">No verification requests available yet.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
             </section>
         </div>
     </main>

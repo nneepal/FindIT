@@ -10,10 +10,35 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
+
+import certifi
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+def _load_env_file():
+    env_paths = [BASE_DIR / '.env', BASE_DIR.parent / '.env']
+    for env_path in env_paths:
+        if not env_path.exists():
+            continue
+
+        for raw_line in env_path.read_text(encoding='utf-8').splitlines():
+            line = raw_line.strip()
+            if not line or line.startswith('#') or '=' not in line:
+                continue
+
+            key, value = line.split('=', 1)
+            os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
+
+
+_load_env_file()
+
+# Use certifi's CA bundle for outbound TLS (for example SMTP STARTTLS)
+# so local Python installs on macOS can validate server certificates.
+os.environ.setdefault('SSL_CERT_FILE', certifi.where())
 
 
 # Quick-start development settings - unsuitable for production
@@ -132,3 +157,29 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+
+# Password reset and email
+PASSWORD_RESET_TIMEOUT = int(os.environ.get('PASSWORD_RESET_TIMEOUT', '3600'))
+
+# Accept shorthand backend values from environment.
+_email_backend_raw = os.environ.get('EMAIL_BACKEND', '').strip().lower()
+_email_backend_aliases = {
+    'smtp': 'django.core.mail.backends.smtp.EmailBackend',
+    'console': 'django.core.mail.backends.console.EmailBackend',
+    'file': 'django.core.mail.backends.filebased.EmailBackend',
+    'locmem': 'django.core.mail.backends.locmem.EmailBackend',
+    'dummy': 'django.core.mail.backends.dummy.EmailBackend',
+}
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'true').lower() == 'true'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+
+if _email_backend_raw:
+    EMAIL_BACKEND = _email_backend_aliases.get(_email_backend_raw, os.environ.get('EMAIL_BACKEND'))
+else:
+    # Default to SMTP so real reset emails are sent when credentials are configured.
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER or 'no-reply@findit.local')

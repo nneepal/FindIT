@@ -1,0 +1,13 @@
+.env
+.env.local
+.env.*
+FindIT/.env
+FindIT/.env.local
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.DS_Store
+db.sqlite3
+media/

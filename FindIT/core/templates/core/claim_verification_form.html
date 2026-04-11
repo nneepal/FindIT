@@ -1,0 +1,75 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Claim Verification - FINDIT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="{% static 'core/claim_verification_form.css' %}"/>
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <h1 class="logo-text">FINDIT</h1>
+            </div>
+            <nav class="nav">
+                <a class="nav-link" href="{% url 'core:index' %}">Home</a>
+                <a class="nav-link" href="{% url 'core:search' %}">Search Item</a>
+                <a class="nav-link" href="{% url 'core:report' %}">Report Item</a>
+                <a class="nav-link" href="{% url 'core:listed-items' %}">Listed Items</a>
+                <a class="nav-link active" href="{% url 'core:pending-complaints' %}">Pending Complaints</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section class="verification-card">
+            <h1>Verification Form</h1>
+            <p>
+                Submit details to verify your claim for <strong>{{ claim.found_item.item_name }}</strong>.
+                Your request will be reviewed manually by admin.
+            </p>
+
+            <div class="item-summary">
+                <div><span>Item:</span> {{ claim.found_item.item_name }}</div>
+                <div><span>Category:</span> {{ claim.found_item.get_category_display }}</div>
+                <div><span>Location Found:</span> {{ claim.found_item.get_location_found_display }}</div>
+                <div><span>Current Status:</span> {% if verification %}{{ verification.get_status_display }}{% else %}Unverified{% endif %}</div>
+            </div>
+
+            {% if form.non_field_errors %}
+            <div class="form-error">{{ form.non_field_errors|join:', ' }}</div>
+            {% endif %}
+
+            <form method="post" enctype="multipart/form-data" class="verification-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_description">Why does this item belong to you?</label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                    <div class="field-error">{{ form.description.errors|join:', ' }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_proof_image">Upload proof image (optional)</label>
+                    {{ form.proof_image }}
+                    {% if form.proof_image.errors %}
+                    <div class="field-error">{{ form.proof_image.errors|join:', ' }}</div>
+                    {% endif %}
+                    {% if verification and verification.proof_image %}
+                    <p class="file-note">Current file: <a href="{{ verification.proof_image.url }}" target="_blank" rel="noopener">View uploaded proof</a></p>
+                    {% endif %}
+                </div>
+
+                <div class="button-row">
+                    <a href="{% url 'core:pending-complaints' %}" class="btn-secondary">Cancel</a>
+                    <button type="submit" class="btn-primary">Submit Verification</button>
+                </div>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

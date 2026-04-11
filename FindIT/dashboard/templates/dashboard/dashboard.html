@@ -264,6 +264,80 @@
                 </div>
 
             </div>
+
+            <div class="claims-card">
+                <div class="card-header">
+                    <span class="material-symbols-outlined card-header-icon">assignment</span>
+                    <h2 class="card-title">Claim & Verification Tracker</h2>
+                </div>
+
+                <div class="claims-tabs" id="claims-tabs">
+                    <button type="button" class="claims-tab active" data-tab-target="claimed-products">Claimed Products</button>
+                    <button type="button" class="claims-tab" data-tab-target="verification-products">Verification Requests</button>
+                </div>
+
+                <div class="claims-tab-panel active" id="claimed-products">
+                    {% if claimed_items %}
+                    <div class="claims-table-wrapper">
+                        <table class="claims-table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Category</th>
+                                    <th>Date Claimed</th>
+                                    <th>Claim State</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for claim in claimed_items %}
+                                <tr>
+                                    <td>{{ claim.found_item.item_name }}</td>
+                                    <td>{{ claim.found_item.get_category_display }}</td>
+                                    <td>{{ claim.created_at|date:'M d, Y H:i' }}</td>
+                                    <td>
+                                        <span class="status-pill status-{{ claim.found_item.claim_status }}">{{ claim.found_item.get_claim_status_display }}</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="claims-empty">You have not claimed any products yet.</p>
+                    {% endif %}
+                </div>
+
+                <div class="claims-tab-panel" id="verification-products">
+                    {% if verification_requests %}
+                    <div class="claims-table-wrapper">
+                        <table class="claims-table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Submitted On</th>
+                                    <th>Verification Status</th>
+                                    <th>Admin Message</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for verification in verification_requests %}
+                                <tr>
+                                    <td>{{ verification.found_item.item_name }}</td>
+                                    <td>{{ verification.submitted_at|date:'M d, Y H:i' }}</td>
+                                    <td>
+                                        <span class="status-pill status-{{ verification.status }}">{{ verification.get_status_display }}</span>
+                                    </td>
+                                    <td>{{ verification.admin_message|default:'-' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="claims-empty">You have not submitted verification details yet.</p>
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </main>
 
@@ -287,6 +361,25 @@
                 toggle.setAttribute('aria-expanded', 'false');
             });
             dropdown.addEventListener('click', (e) => e.stopPropagation());
+        }
+
+        const claimTabsContainer = document.getElementById('claims-tabs');
+        if (claimTabsContainer) {
+            const tabs = claimTabsContainer.querySelectorAll('.claims-tab');
+            const panels = document.querySelectorAll('.claims-tab-panel');
+
+            tabs.forEach((tab) => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach((otherTab) => otherTab.classList.remove('active'));
+                    panels.forEach((panel) => panel.classList.remove('active'));
+
+                    tab.classList.add('active');
+                    const target = document.getElementById(tab.dataset.tabTarget);
+                    if (target) {
+                        target.classList.add('active');
+                    }
+                });
+            });
         }
     </script>
 </body>
