@@ -10,19 +10,19 @@ class FoundItem(models.Model):
 
 	CATEGORY_CHOICES = [
 		('electronics', 'Electronics'),
-		('clothing', 'Clothing & Accessories'),
-		('documents', 'IDs & Documents'),
+		('clothing', 'Clothing'),
+		('documents', 'Documents'),
 		('keys', 'Keys'),
 		('other', 'Other'),
 	]
 
 	LOCATION_CHOICES = [
-		('library', 'Main Library'),
 		('cafeteria', 'Cafeteria'),
-		('gym', 'Gymnasium'),
+		('classroom', 'Classroom'),
+		('lecture_hall', 'Lecture Hall'),
 		('parking', 'Parking Lot A'),
-		('lobby', 'Main Lobby'),
-		('other', 'Other'),
+		('library', 'Library'),
+		('playground', 'Playground'),
 	]
 
 	CONDITION_CHOICES = [
@@ -61,25 +61,24 @@ class LostItem(models.Model):
 	CATEGORY_CHOICES = [
 		('electronics', 'Electronics'),
 		('clothing', 'Clothing'),
-		('accessories', 'Accessories'),
 		('documents', 'Documents'),
+		('keys', 'Keys'),
 		('other', 'Other'),
 	]
 
 	CONDITION_CHOICES = [
-		('new', 'Like New'),
+		('new', 'New'),
 		('good', 'Good'),
-		('fair', 'Fair (Scratched)'),
-		('poor', 'Damaged'),
+		('damaged', 'Damaged'),
 	]
 
 	LOCATION_CHOICES = [
-		('library', 'Main Library'),
-		('cafeteria', 'Student Cafeteria'),
-		('gym', 'Sports Gym'),
-		('hall_a', 'Lecture Hall A'),
-		('dorm', 'Dormitory Block'),
-		('other', 'Other'),
+		('cafeteria', 'Cafeteria'),
+		('classroom', 'Classroom'),
+		('lecture_hall', 'Lecture Hall'),
+		('parking', 'Parking Lot A'),
+		('library', 'Library'),
+		('playground', 'Playground'),
 	]
 
 	searched_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='lost_items')

@@ -9,9 +9,9 @@ class FoundItemReportForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['category'].choices = [('', 'Select category'), *self.fields['category'].choices]
-        self.fields['location_found'].choices = [('', 'Where did you find it?'), *self.fields['location_found'].choices]
-        self.fields['condition'].choices = [('', 'Select condition'), *self.fields['condition'].choices]
+        self.fields['category'].choices = [('', '---'), *self.fields['category'].choices]
+        self.fields['location_found'].choices = [('', '---'), *self.fields['location_found'].choices]
+        self.fields['condition'].choices = [('', '---'), *self.fields['condition'].choices]
 
     class Meta:
         model = FoundItem
@@ -75,9 +75,9 @@ class LostItemSearchForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['category'].choices = [('', 'Select Category'), *self.fields['category'].choices]
-        self.fields['condition'].choices = [('', 'Select Condition'), *self.fields['condition'].choices]
-        self.fields['location_lost'].choices = [('', 'Select Location'), *self.fields['location_lost'].choices]
+        self.fields['category'].choices = [('', '---'), *self.fields['category'].choices]
+        self.fields['condition'].choices = [('', '---'), *self.fields['condition'].choices]
+        self.fields['location_lost'].choices = [('', '---'), *self.fields['location_lost'].choices]
 
     class Meta:
         model = LostItem

@@ -70,8 +70,17 @@
         </div>
     </header>
 
-    <main class="main-content">
-        <div class="content-wrapper">
+    <main class="main-content admin-layout">
+        <aside class="admin-sidebar" aria-label="Admin sections">
+            <h2 class="sidebar-title">Admin</h2>
+            <button class="sidebar-link active" type="button" data-target="users-section">User Management</button>
+            <button class="sidebar-link" type="button" data-target="found-section">Manage Found Items</button>
+            <button class="sidebar-link" type="button" data-target="lost-section">Manage Lost Items</button>
+            <button class="sidebar-link" type="button" data-target="verification-section">Claim Verification</button>
+            <button class="sidebar-link" type="button" data-target="complaints-section">Pending Complaints / Claimed Items</button>
+        </aside>
+
+        <div class="content-wrapper admin-content">
             {% if messages %}
                 <section class="alerts">
                     {% for message in messages %}
@@ -109,17 +118,13 @@
                     <p class="stat-value" data-stat="lost_reports">{{ stats.lost_reports }}</p>
                 </div>
                 <div class="stat-card">
-                    <p class="stat-label">Active Users / Recovery Rate</p>
-                    <p class="stat-value">
-                        <span data-stat="active_users">{{ stats.active_users }}</span>
-                        /
-                        <span data-stat="recovery_rate">{{ stats.recovery_rate }}</span>
-                    </p>
+                    <p class="stat-label">Active Users</p>
+                    <p class="stat-value" data-stat="active_users">{{ stats.active_users }}</p>
                 </div>
             </section>
 
-            <section class="tables-grid">
-                <section class="table-section">
+            <section class="admin-sections">
+                <section class="table-section admin-section active" id="users-section">
                     <div class="table-header">
                         <div>
                             <h2 class="table-title">User Management</h2>
@@ -187,7 +192,7 @@
                     </div>
                 </section>
 
-                <section class="table-section">
+                <section class="table-section admin-section" id="found-section">
                     <div class="table-header">
                         <div>
                             <h2 class="table-title">Manage Found Items</h2>
@@ -277,7 +282,7 @@
                     </div>
                 </section>
 
-                <section class="table-section">
+                <section class="table-section admin-section" id="lost-section">
                     <div class="table-header">
                         <div>
                             <h2 class="table-title">Manage Lost Items</h2>
@@ -363,7 +368,7 @@
                     </div>
                 </section>
 
-                <section class="table-section verification-section">
+                <section class="table-section admin-section" id="complaints-section">
                     <div class="table-header">
                         <div>
                             <h2 class="table-title">Pending Complaints / Claimed Items</h2>
@@ -411,7 +416,7 @@
                     </div>
                 </section>
 
-                <section class="table-section verification-section">
+                <section class="table-section admin-section" id="verification-section">
                     <div class="table-header">
                         <div>
                             <h2 class="table-title">Claim Verification Requests</h2>
@@ -532,6 +537,24 @@
         }
 
         setInterval(refreshStats, 10000);
+
+        const sidebarLinks = document.querySelectorAll('.sidebar-link');
+        const adminSections = document.querySelectorAll('.admin-section');
+
+        function showSection(targetId) {
+            adminSections.forEach((section) => {
+                section.classList.toggle('active', section.id === targetId);
+            });
+            sidebarLinks.forEach((link) => {
+                link.classList.toggle('active', link.dataset.target === targetId);
+            });
+        }
+
+        sidebarLinks.forEach((link) => {
+            link.addEventListener('click', () => {
+                showSection(link.dataset.target);
+            });
+        });
     </script>
 </body>
 </html>
