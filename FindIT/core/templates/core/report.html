@@ -66,7 +66,7 @@
 
     <main class="main-content">
         <div class="report-container">
-            <form class="report-form-wrap" method="POST" enctype="multipart/form-data" novalidate>
+            <form class="report-form-wrap" method="POST" enctype="multipart/form-data" novalidate data-detect-url="{% url 'core:detect-report-category' %}">
                 {% csrf_token %}
 
                 <div class="upload-section">
@@ -93,6 +93,12 @@
                         <span class="info-item">
                             <span class="material-symbols-outlined">check_circle</span> Max 5MB
                         </span>
+                    </div>
+                    <div class="detection-status {% if detection_status_class %}{{ detection_status_class }}{% endif %}" id="detection-status" role="status" aria-live="polite">
+                        <span class="detection-status-label">Model detection</span>
+                        <p class="detection-status-text" id="detection-status-text">
+                            {% if detection_message %}{{ detection_message }}{% else %}Upload an image to auto-detect the category.{% endif %}
+                        </p>
                     </div>
                     {% if form.image.errors %}
                     <div class="field-errors">{{ form.image.errors }}</div>
@@ -240,11 +246,73 @@
             dropdown.addEventListener('click', (e) => e.stopPropagation());
         }
 
-        const fileInput = document.getElementById('file-upload');
+        const fileInput = document.getElementById('file-upload') || document.querySelector('input[name="image"]');
         const fileNameTarget = document.getElementById('selected-file-name');
+        const reportForm = document.querySelector('.report-form-wrap');
+        const categorySelect = document.getElementById('{{ form.category.id_for_label }}');
+        const detectionStatus = document.getElementById('detection-status');
+        const detectionStatusText = document.getElementById('detection-status-text');
+        const csrfTokenInput = reportForm ? reportForm.querySelector('input[name="csrfmiddlewaretoken"]') : null;
+        let detectionRequestId = 0;
+
+        function setDetectionStatus(message, state) {
+            if (!detectionStatus || !detectionStatusText) {
+                return;
+            }
+
+            detectionStatus.classList.remove('is-detected', 'is-error', 'is-loading');
+            if (state) {
+                detectionStatus.classList.add(state);
+            }
+            detectionStatusText.textContent = message;
+        }
+
+        async function detectCategoryFromImage(file) {
+            if (!reportForm || !categorySelect || !csrfTokenInput) {
+                return;
+            }
+
+            const requestId = ++detectionRequestId;
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('csrfmiddlewaretoken', csrfTokenInput.value);
+
+            setDetectionStatus('Detecting item category...', 'is-loading');
+
+            try {
+                const response = await fetch(reportForm.dataset.detectUrl, {
+                    method: 'POST',
+                    body: formData,
+                });
+                const data = await response.json();
+
+                if (requestId !== detectionRequestId) {
+                    return;
+                }
+
+                const detectedCategory = data.category_value || 'other';
+                const categoryExists = Array.from(categorySelect.options).some((option) => option.value === detectedCategory);
+                categorySelect.value = categoryExists ? detectedCategory : 'other';
+                setDetectionStatus(data.message || 'Category detected.', response.ok ? 'is-detected' : 'is-error');
+            } catch (error) {
+                if (requestId !== detectionRequestId) {
+                    return;
+                }
+
+                categorySelect.value = 'other';
+                setDetectionStatus('Auto-detection failed. Category set to Other.', 'is-error');
+            }
+        }
+
         if (fileInput && fileNameTarget) {
             fileInput.addEventListener('change', () => {
                 fileNameTarget.textContent = fileInput.files.length ? fileInput.files[0].name : 'No file selected';
+
+                if (fileInput.files.length) {
+                    detectCategoryFromImage(fileInput.files[0]);
+                } else {
+                    setDetectionStatus('Upload an image to auto-detect the category.');
+                }
             });
         }
     </script>

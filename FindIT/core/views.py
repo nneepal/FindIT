@@ -2,10 +2,12 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import CharField, OuterRef, Prefetch, Q, Subquery, Value
 from django.db.models.functions import Coalesce
+from django.http import JsonResponse
 from django.http import HttpResponseNotAllowed
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect, render
 
+from .detection import detect_item_category
 from .forms import ClaimVerificationForm, FoundItemReportForm, LostItemSearchForm
 from .models import ClaimVerification, FoundItem, FoundItemClaim, LostItem
 
@@ -16,36 +18,108 @@ def index(request):
 
 @login_required
 def report_item(request):
+    detection_message = None
+    detection_status_class = None
+
     if request.method == 'POST':
-        form = FoundItemReportForm(request.POST, request.FILES)
+        post_data = request.POST.copy()
+        uploaded_image = request.FILES.get('image')
+        detection_result = None
+
+        if uploaded_image and not post_data.get('category'):
+            detection_result = detect_item_category(uploaded_image)
+            post_data['category'] = detection_result['category_value']
+            detection_message = detection_result['message']
+            detection_status_class = 'is-error' if not detection_result['raw_label'] else 'is-detected'
+
+        form = FoundItemReportForm(post_data, request.FILES)
         if form.is_valid():
             found_item = form.save(commit=False)
             found_item.reported_by = request.user
             found_item.save()
+            if detection_result:
+                messages.info(request, detection_result['message'])
             messages.success(request, 'Found item report submitted successfully.')
             return redirect('core:report')
         messages.error(request, 'Please fix the errors below and submit again.')
     else:
         form = FoundItemReportForm()
 
-    return render(request, 'core/report.html', {'form': form})
+    return render(
+        request,
+        'core/report.html',
+        {
+            'form': form,
+            'detection_message': detection_message,
+            'detection_status_class': detection_status_class,
+        },
+    )
+
+
+@login_required
+def detect_report_category(request):
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+
+    uploaded_image = request.FILES.get('image')
+    if not uploaded_image:
+        return JsonResponse({'detail': 'No image uploaded.'}, status=400)
+
+    detection_result = detect_item_category(uploaded_image)
+    return JsonResponse(detection_result)
 
 
 @login_required
 def search_item(request):
+    detection_message = None
+    detection_status_class = None
+
     if request.method == 'POST':
-        form = LostItemSearchForm(request.POST, request.FILES)
+        post_data = request.POST.copy()
+        uploaded_image = request.FILES.get('image')
+        detection_result = None
+
+        if uploaded_image and not post_data.get('category'):
+            detection_result = detect_item_category(uploaded_image)
+            post_data['category'] = detection_result['category_value']
+            detection_message = detection_result['message']
+            detection_status_class = 'is-error' if not detection_result['raw_label'] else 'is-detected'
+
+        form = LostItemSearchForm(post_data, request.FILES)
         if form.is_valid():
             lost_item = form.save(commit=False)
             lost_item.searched_by = request.user
             lost_item.save()
+            if detection_result:
+                messages.info(request, detection_result['message'])
             messages.success(request, 'Search request submitted and saved successfully.')
             return redirect('core:search')
         messages.error(request, 'Please fix the errors below and submit again.')
     else:
         form = LostItemSearchForm()
 
-    return render(request, 'core/search.html', {'form': form})
+    return render(
+        request,
+        'core/search.html',
+        {
+            'form': form,
+            'detection_message': detection_message,
+            'detection_status_class': detection_status_class,
+        },
+    )
+
+
+@login_required
+def detect_search_category(request):
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+
+    uploaded_image = request.FILES.get('image')
+    if not uploaded_image:
+        return JsonResponse({'detail': 'No image uploaded.'}, status=400)
+
+    detection_result = detect_item_category(uploaded_image)
+    return JsonResponse(detection_result)
 
 
 def listed_items(request):

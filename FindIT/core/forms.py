@@ -5,7 +5,12 @@ from .models import ClaimVerification, FoundItem, LostItem
 
 
 class FoundItemReportForm(forms.ModelForm):
-    image = forms.FileField(required=True)
+    image = forms.FileField(
+        required=True,
+        widget=forms.ClearableFileInput(
+            attrs={'class': 'file-input', 'id': 'file-upload', 'accept': '.jpg,.jpeg,.png,image/png,image/jpeg'}
+        ),
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -71,7 +76,12 @@ class FoundItemReportForm(forms.ModelForm):
 
 
 class LostItemSearchForm(forms.ModelForm):
-    image = forms.FileField(required=True)
+    image = forms.FileField(
+        required=True,
+        widget=forms.ClearableFileInput(
+            attrs={'class': 'file-input', 'id': 'search-file-upload', 'accept': '.jpg,.jpeg,.png,image/png,image/jpeg'}
+        ),
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

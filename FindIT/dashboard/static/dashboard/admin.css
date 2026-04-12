@@ -977,6 +977,79 @@ body {
     color: var(--color-primary);
 }
 
+.confirm-modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    z-index: 1000;
+}
+
+.confirm-modal.open {
+    display: block;
+}
+
+.confirm-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+}
+
+.confirm-modal-dialog {
+    position: relative;
+    width: min(92vw, 420px);
+    margin: 20vh auto 0;
+    background: #ffffff;
+    border: 1px solid #dbe3db;
+    border-radius: 10px;
+    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.22);
+    padding: 1rem;
+}
+
+.confirm-modal-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.5rem;
+}
+
+.confirm-modal-message {
+    font-size: 0.9rem;
+    line-height: 1.45;
+    color: #475569;
+}
+
+.confirm-modal-actions {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.6rem;
+}
+
+.confirm-btn {
+    border-radius: 6px;
+    padding: 0.45rem 0.85rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 1px solid #d1d5db;
+    cursor: pointer;
+}
+
+.confirm-btn-cancel {
+    background: #ffffff;
+    color: #334155;
+}
+
+.confirm-btn-proceed {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #0b2a03;
+}
+
+.confirm-btn-proceed:hover {
+    background: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+}
+
 .dropdown-item-primary {
     color: var(--color-primary);
     font-weight: 600;

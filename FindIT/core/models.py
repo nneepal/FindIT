@@ -11,6 +11,11 @@ class FoundItem(models.Model):
 	CATEGORY_CHOICES = [
 		('electronics', 'Electronics'),
 		('clothing', 'Clothing'),
+		('stationery', 'Stationery'),
+		('jewellery', 'Jewellery'),
+		('bottle', 'Bottle'),
+		('wallet', 'Wallet'),
+		('bags', 'Bags'),
 		('documents', 'Documents'),
 		('keys', 'Keys'),
 		('other', 'Other'),
@@ -61,6 +66,11 @@ class LostItem(models.Model):
 	CATEGORY_CHOICES = [
 		('electronics', 'Electronics'),
 		('clothing', 'Clothing'),
+		('stationery', 'Stationery'),
+		('jewellery', 'Jewellery'),
+		('bottle', 'Bottle'),
+		('wallet', 'Wallet'),
+		('bags', 'Bags'),
 		('documents', 'Documents'),
 		('keys', 'Keys'),
 		('other', 'Other'),

@@ -3,3 +3,5 @@ certifi==2026.2.27
 Django==6.0.2
 psycopg2-binary==2.9.11
 sqlparse==0.5.5
+ultralytics==8.4.37
+pillow==12.2.0

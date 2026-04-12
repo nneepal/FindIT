@@ -498,6 +498,18 @@
         </div>
     </footer>
 
+    <div class="confirm-modal" id="confirm-modal" aria-hidden="true">
+        <div class="confirm-modal-backdrop" data-confirm-close></div>
+        <div class="confirm-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title">
+            <h2 class="confirm-modal-title" id="confirm-modal-title">Confirm Action</h2>
+            <p class="confirm-modal-message" id="confirm-modal-message">Are you sure you want to continue?</p>
+            <div class="confirm-modal-actions">
+                <button type="button" class="confirm-btn confirm-btn-cancel" id="confirm-cancel-btn">Cancel</button>
+                <button type="button" class="confirm-btn confirm-btn-proceed" id="confirm-proceed-btn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const toggle = document.getElementById('account-toggle');
         const dropdown = document.getElementById('account-dropdown');
@@ -554,6 +566,130 @@
             link.addEventListener('click', () => {
                 showSection(link.dataset.target);
             });
+        });
+
+        const confirmModal = document.getElementById('confirm-modal');
+        const confirmModalMessage = document.getElementById('confirm-modal-message');
+        const confirmCancelBtn = document.getElementById('confirm-cancel-btn');
+        const confirmProceedBtn = document.getElementById('confirm-proceed-btn');
+
+        const confirmableActions = new Set([
+            'add_user',
+            'delete_user',
+            'add_found_item',
+            'delete_found_item',
+            'add_lost_item',
+            'delete_lost_item',
+            'review_verification',
+            'close_complaint',
+        ]);
+
+        const actionMessages = {
+            add_user: 'Add this user account?',
+            delete_user: 'Delete this user account? This cannot be undone.',
+            add_found_item: 'Add this found item record?',
+            delete_found_item: 'Delete this found item record? This cannot be undone.',
+            add_lost_item: 'Add this lost item record?',
+            delete_lost_item: 'Delete this lost item record? This cannot be undone.',
+            close_complaint: 'Close this complaint and update related claim status?',
+        };
+
+        let pendingForm = null;
+        let pendingSubmitter = null;
+        let allowSubmit = false;
+
+        function getConfirmationMessage(action, submitter) {
+            if (action === 'review_verification') {
+                if (submitter && submitter.name === 'decision' && submitter.value === 'verified') {
+                    return 'Mark this verification request as Verified?';
+                }
+                if (submitter && submitter.name === 'decision' && submitter.value === 'rejected') {
+                    return 'Mark this verification request as Rejected?';
+                }
+                return 'Submit verification decision?';
+            }
+
+            return actionMessages[action] || 'Are you sure you want to continue?';
+        }
+
+        function openConfirmModal(message) {
+            if (!confirmModal || !confirmModalMessage) {
+                return;
+            }
+
+            confirmModalMessage.textContent = message;
+            confirmModal.classList.add('open');
+            confirmModal.setAttribute('aria-hidden', 'false');
+            confirmProceedBtn?.focus();
+        }
+
+        function closeConfirmModal() {
+            if (!confirmModal) {
+                return;
+            }
+
+            confirmModal.classList.remove('open');
+            confirmModal.setAttribute('aria-hidden', 'true');
+            pendingForm = null;
+            pendingSubmitter = null;
+        }
+
+        document.addEventListener('submit', (event) => {
+            const form = event.target;
+            if (!(form instanceof HTMLFormElement)) {
+                return;
+            }
+
+            if (allowSubmit) {
+                return;
+            }
+
+            const actionField = form.querySelector('input[name="action"]');
+            const action = actionField ? actionField.value : '';
+
+            if (!confirmableActions.has(action)) {
+                return;
+            }
+
+            event.preventDefault();
+            pendingForm = form;
+            pendingSubmitter = event.submitter || null;
+            openConfirmModal(getConfirmationMessage(action, pendingSubmitter));
+        });
+
+        confirmCancelBtn?.addEventListener('click', closeConfirmModal);
+        confirmModal?.addEventListener('click', (event) => {
+            if (event.target instanceof HTMLElement && event.target.hasAttribute('data-confirm-close')) {
+                closeConfirmModal();
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && confirmModal?.classList.contains('open')) {
+                closeConfirmModal();
+            }
+        });
+
+        confirmProceedBtn?.addEventListener('click', () => {
+            if (!pendingForm) {
+                closeConfirmModal();
+                return;
+            }
+
+            pendingForm.querySelectorAll('input[data-confirm-temp]').forEach((node) => node.remove());
+
+            if (pendingSubmitter && pendingSubmitter.name) {
+                const hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = pendingSubmitter.name;
+                hidden.value = pendingSubmitter.value;
+                hidden.setAttribute('data-confirm-temp', 'true');
+                pendingForm.appendChild(hidden);
+            }
+
+            allowSubmit = true;
+            pendingForm.submit();
+            allowSubmit = false;
         });
     </script>
 </body>
