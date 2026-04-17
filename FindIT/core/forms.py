@@ -31,9 +31,7 @@ class FoundItemReportForm(forms.ModelForm):
             'image',
         ]
         widgets = {
-            'item_name': forms.TextInput(
-                attrs={'class': 'form-input', 'placeholder': 'e.g. Blue Umbrella'}
-            ),
+            'item_name': forms.TextInput(attrs={'class': 'form-input'}),
             'category': forms.Select(attrs={'class': 'form-select'}),
             'location_found': forms.Select(attrs={'class': 'form-select with-icon'}),
             'date_found': forms.DateInput(attrs={'class': 'form-input', 'type': 'date'}),
@@ -42,13 +40,7 @@ class FoundItemReportForm(forms.ModelForm):
                 choices=[(True, 'Yes'), (False, 'No')],
                 attrs={'class': 'radio-input'},
             ),
-            'description': forms.Textarea(
-                attrs={
-                    'class': 'form-textarea',
-                    'placeholder': 'Describe any unique features, scratches, or contents...',
-                    'rows': 4,
-                }
-            ),
+            'description': forms.Textarea(attrs={'class': 'form-textarea', 'rows': 4}),
             'image': forms.ClearableFileInput(
                 attrs={'class': 'file-input', 'id': 'file-upload', 'accept': '.jpg,.jpeg,.png,image/png,image/jpeg'}
             ),
@@ -101,20 +93,12 @@ class LostItemSearchForm(forms.ModelForm):
             'image',
         ]
         widgets = {
-            'item_name': forms.TextInput(
-                attrs={'class': 'form-input', 'placeholder': 'e.g. Blue Jansport Backpack'}
-            ),
+            'item_name': forms.TextInput(attrs={'class': 'form-input'}),
             'category': forms.Select(attrs={'class': 'form-select'}),
             'condition': forms.Select(attrs={'class': 'form-select'}),
             'location_lost': forms.Select(attrs={'class': 'form-select with-icon'}),
             'date_lost': forms.DateInput(attrs={'class': 'form-input', 'type': 'date'}),
-            'description': forms.Textarea(
-                attrs={
-                    'class': 'form-textarea',
-                    'placeholder': 'Any unique identifiers, stickers, or distinguishing marks?',
-                    'rows': 3,
-                }
-            ),
+            'description': forms.Textarea(attrs={'class': 'form-textarea', 'rows': 3}),
             'image': forms.ClearableFileInput(
                 attrs={'class': 'file-input', 'id': 'search-file-upload', 'accept': '.jpg,.jpeg,.png,image/png,image/jpeg'}
             ),

@@ -5,13 +5,14 @@ from django.utils import timezone
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
 from accounts.forms import ProfileUpdateForm
 from accounts.models import UserProfile
 from core.forms import FoundItemReportForm, LostItemSearchForm
-from core.models import ClaimVerification, FoundItem, FoundItemClaim, LostItem
+from core.models import ClaimVerification, FoundItem, FoundItemClaim, LostItem, Notification
 
 
 @login_required
@@ -168,6 +169,18 @@ def admin_dashboard_view(request):
                     verification.reviewed_by = request.user
                     verification.reviewed_at = timezone.now()
                     verification.save(update_fields=['status', 'admin_message', 'reviewed_by', 'reviewed_at', 'updated_at'])
+
+                    if decision == 'verified':
+                        Notification.objects.create(
+                            recipient=verification.claimed_by,
+                            title='Verification approved',
+                            message=(
+                                f'Your verification details for "{verification.found_item.item_name}" '
+                                'were approved by admin.'
+                            ),
+                            link=reverse('core:pending-complaints'),
+                        )
+
                     messages.success(request, f'Verification request marked as {decision}.')
                     return redirect('admin-dashboard')
 

@@ -23,9 +23,15 @@
                 <a class="nav-link" href="{% url 'core:pending-complaints' %}">Pending Complaints</a>
             </nav>
             <div class="actions">
-                <button class="icon-btn">
-                    <span class="material-symbols-outlined">search</span>
-                </button>
+                {% if user.is_authenticated %}
+                <a class="icon-btn" href="{% url 'core:notifications' %}" aria-label="Notifications">
+                    <span class="material-symbols-outlined">notifications</span>
+                </a>
+                {% else %}
+                <a class="icon-btn" href="{% url 'accounts:login' %}" aria-label="Notifications">
+                    <span class="material-symbols-outlined">notifications</span>
+                </a>
+                {% endif %}
                 <div class="account-menu">
                     <button class="icon-btn account-btn" id="account-toggle" aria-expanded="false" aria-label="Account menu">
                         <span class="material-symbols-outlined">account_circle</span>
@@ -136,7 +142,7 @@
                         </form>
                     </div>
 
-                    <form class="inline-form" method="post" action="{% url 'admin-dashboard' %}">
+                    <form class="inline-form" method="post" action="{% url 'admin-dashboard' %}" novalidate>
                         {% csrf_token %}
                         <input type="hidden" name="action" value="add_user"/>
                         <input class="search-input" name="username" placeholder="Username" required type="text"/>
@@ -170,7 +176,7 @@
                                         <td>{{ user_obj.profile.get_full_name }}</td>
                                         <td>{{ user_obj.email|default:"-" }}</td>
                                         <td>
-                                            <form method="post" action="{% url 'admin-dashboard' %}">
+                                            <form method="post" action="{% url 'admin-dashboard' %}" novalidate>
                                                 {% csrf_token %}
                                                 <input type="hidden" name="action" value="delete_user"/>
                                                 <input type="hidden" name="user_id" value="{{ user_obj.id }}"/>
@@ -204,7 +210,7 @@
                         </form>
                     </div>
 
-                    <form class="inline-form" method="post" action="{% url 'admin-dashboard' %}" enctype="multipart/form-data">
+                    <form class="inline-form" method="post" action="{% url 'admin-dashboard' %}" enctype="multipart/form-data" novalidate>
                         {% csrf_token %}
                         <input type="hidden" name="action" value="add_found_item"/>
                         <input class="search-input" name="item_name" placeholder="Item name" required type="text"/>
@@ -260,7 +266,7 @@
                                         <td>{{ item.reported_by.username }}</td>
                                         <td>{{ item.get_claim_status_display }}</td>
                                         <td>
-                                            <form method="post" action="{% url 'admin-dashboard' %}">
+                                            <form method="post" action="{% url 'admin-dashboard' %}" novalidate>
                                                 {% csrf_token %}
                                                 <input type="hidden" name="action" value="delete_found_item"/>
                                                 <input type="hidden" name="item_id" value="{{ item.id }}"/>
@@ -294,7 +300,7 @@
                         </form>
                     </div>
 
-                    <form class="inline-form" method="post" action="{% url 'admin-dashboard' %}" enctype="multipart/form-data">
+                    <form class="inline-form" method="post" action="{% url 'admin-dashboard' %}" enctype="multipart/form-data" novalidate>
                         {% csrf_token %}
                         <input type="hidden" name="action" value="add_lost_item"/>
                         <input class="search-input" name="item_name" placeholder="Item name" required type="text"/>
@@ -346,7 +352,7 @@
                                         <td>{{ item.searched_by.username }}</td>
                                         <td>{{ item.get_claim_status_display }}</td>
                                         <td>
-                                            <form method="post" action="{% url 'admin-dashboard' %}">
+                                            <form method="post" action="{% url 'admin-dashboard' %}" novalidate>
                                                 {% csrf_token %}
                                                 <input type="hidden" name="action" value="delete_lost_item"/>
                                                 <input type="hidden" name="item_id" value="{{ item.id }}"/>
@@ -397,7 +403,7 @@
                                             <span class="verification-status status-{{ complaint.status }}">{{ complaint.get_status_display }}</span>
                                         </td>
                                         <td>
-                                            <form method="post" action="{% url 'admin-dashboard' %}" class="verification-form-inline">
+                                            <form method="post" action="{% url 'admin-dashboard' %}" class="verification-form-inline" novalidate>
                                                 {% csrf_token %}
                                                 <input type="hidden" name="action" value="close_complaint"/>
                                                 <input type="hidden" name="verification_id" value="{{ complaint.id }}"/>
@@ -453,7 +459,7 @@
                                             <span class="verification-status status-{{ verification.status }}">{{ verification.get_status_display }}</span>
                                         </td>
                                         <td>
-                                            <form method="post" action="{% url 'admin-dashboard' %}" class="verification-form-inline">
+                                            <form method="post" action="{% url 'admin-dashboard' %}" class="verification-form-inline" novalidate>
                                                 {% csrf_token %}
                                                 <input type="hidden" name="action" value="review_verification"/>
                                                 <input type="hidden" name="verification_id" value="{{ verification.id }}"/>

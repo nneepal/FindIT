@@ -23,9 +23,15 @@
                 <a class="nav-link" href="{% url 'core:pending-complaints' %}">Pending Complaints</a>
             </nav>
             <div class="actions">
-                <button class="icon-btn">
-                    <span class="material-symbols-outlined">search</span>
-                </button>
+                {% if user.is_authenticated %}
+                <a class="icon-btn" href="{% url 'core:notifications' %}" aria-label="Notifications">
+                    <span class="material-symbols-outlined">notifications</span>
+                </a>
+                {% else %}
+                <a class="icon-btn" href="{% url 'accounts:login' %}" aria-label="Notifications">
+                    <span class="material-symbols-outlined">notifications</span>
+                </a>
+                {% endif %}
                 <div class="account-menu">
                     <button class="icon-btn account-btn" id="account-toggle" aria-expanded="false" aria-label="Account menu">
                         <span class="material-symbols-outlined">account_circle</span>
@@ -77,7 +83,6 @@
                     <div class="upload-wrapper">
                         <label class="drop-zone" for="file-upload">
                             <div class="drop-content">
-                                <span class="material-symbols-outlined drop-icon">add_photo_alternate</span>
                                 <p class="drop-main-text">Drag photo here</p>
                                 <p class="drop-sub-text">or click to browse from your device</p>
                                 <span class="select-file-btn">Select File</span>

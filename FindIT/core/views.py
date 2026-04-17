@@ -1,15 +1,17 @@
 from django.contrib import messages
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.db.models import CharField, OuterRef, Prefetch, Q, Subquery, Value
 from django.db.models.functions import Coalesce
 from django.http import JsonResponse
 from django.http import HttpResponseNotAllowed
+from django.urls import reverse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect, render
 
 from .detection import detect_item_category
 from .forms import ClaimVerificationForm, FoundItemReportForm, LostItemSearchForm
-from .models import ClaimVerification, FoundItem, FoundItemClaim, LostItem
+from .models import ClaimVerification, FoundItem, FoundItemClaim, LostItem, Notification
 
 
 def index(request):
@@ -264,6 +266,26 @@ def verify_claim(request, claim_id):
             verification.reviewed_by = None
             verification.reviewed_at = None
             verification.save()
+
+            admin_users = User.objects.filter(is_active=True).filter(
+                Q(is_staff=True) | Q(is_superuser=True)
+            ).distinct()
+            if admin_users.exists():
+                Notification.objects.bulk_create(
+                    [
+                        Notification(
+                            recipient=admin_user,
+                            title='New verification request',
+                            message=(
+                                f'{request.user.username} submitted verification details '
+                                f'for "{claim.found_item.item_name}".'
+                            ),
+                            link=reverse('admin-dashboard'),
+                        )
+                        for admin_user in admin_users
+                    ]
+                )
+
             messages.success(request, 'Verification details submitted and sent to admin dashboard.')
             return redirect('core:pending-complaints')
         messages.error(request, 'Please fix the errors and submit the verification form again.')
@@ -276,3 +298,10 @@ def verify_claim(request, claim_id):
         'verification': verification_instance,
     }
     return render(request, 'core/claim_verification_form.html', context)
+
+
+@login_required
+def notifications_list(request):
+    notifications = Notification.objects.filter(recipient=request.user).order_by('-created_at')
+    notifications.filter(is_read=False).update(is_read=True)
+    return render(request, 'core/notifications.html', {'notifications': notifications})

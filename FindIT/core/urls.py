@@ -5,6 +5,7 @@ app_name = 'core'
 
 urlpatterns = [
     path('', views.index, name='index'),
+    path('notifications/', views.notifications_list, name='notifications'),
     path('search/', views.search_item, name='search'),
     path('search/detect-category/', views.detect_search_category, name='detect-search-category'),
     path('report/', views.report_item, name='report'),

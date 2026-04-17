@@ -9,21 +9,21 @@ from django.template import loader
 class SignupForm(forms.Form):
     full_name = forms.CharField(
         max_length=100,
-        widget=forms.TextInput(attrs={'placeholder': 'Enter your full name', 'class': 'form-input'}),
+        widget=forms.TextInput(attrs={'class': 'form-input'}),
     )
     username = forms.CharField(
         max_length=150,
-        widget=forms.TextInput(attrs={'placeholder': 'Enter username', 'class': 'form-input'}),
+        widget=forms.TextInput(attrs={'class': 'form-input'}),
     )
     email = forms.EmailField(
         required=True,
-        widget=forms.EmailInput(attrs={'placeholder': 'Enter your email', 'class': 'form-input'}),
+        widget=forms.EmailInput(attrs={'class': 'form-input'}),
     )
     password = forms.CharField(
-        widget=forms.PasswordInput(attrs={'placeholder': '••••••••', 'class': 'form-input password-input'}),
+        widget=forms.PasswordInput(attrs={'class': 'form-input password-input'}),
     )
     confirm_password = forms.CharField(
-        widget=forms.PasswordInput(attrs={'placeholder': '••••••••', 'class': 'form-input password-input'}),
+        widget=forms.PasswordInput(attrs={'class': 'form-input password-input'}),
     )
 
     def clean_username(self):

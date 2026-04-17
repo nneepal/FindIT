@@ -26,9 +26,15 @@
                 <a class="nav-link" href="{% url 'core:pending-complaints' %}">Pending Complaints</a>
             </nav>
             <div class="actions">
-                <button class="icon-btn">
-                    <span class="material-symbols-outlined">search</span>
-                </button>
+                {% if user.is_authenticated %}
+                <a class="icon-btn" href="{% url 'core:notifications' %}" aria-label="Notifications">
+                    <span class="material-symbols-outlined">notifications</span>
+                </a>
+                {% else %}
+                <a class="icon-btn" href="{% url 'accounts:login' %}" aria-label="Notifications">
+                    <span class="material-symbols-outlined">notifications</span>
+                </a>
+                {% endif %}
                 <div class="account-menu">
                     <button class="icon-btn account-btn" id="account-toggle" aria-expanded="false" aria-label="Account menu">
                         <span class="material-symbols-outlined">account_circle</span>
@@ -89,7 +95,7 @@
             </div>
 
             <!-- Login Form -->
-            <form action="{% url 'accounts:login' %}" class="login-form" method="POST">
+            <form action="{% url 'accounts:login' %}" class="login-form" method="POST" novalidate>
                 {% csrf_token %}
                 {% if error %}
                 <div class="form-error-banner">
@@ -101,17 +107,17 @@
                     <!-- Username Field -->
                     <div class="form-group">
                         <label class="form-label" for="username">Username</label>
+                        {% if field_errors.username %}<span class="field-error">{{ field_errors.username }}</span>{% endif %}
                         <div class="input-wrapper">
                             <div class="input-icon">
                                 <span class="material-symbols-outlined">person</span>
                             </div>
                             <input 
                                 autocomplete="username" 
-                                class="form-input" 
+                                class="form-input{% if field_errors.username %} input-error{% endif %}" 
                                 id="username" 
                                 name="username" 
-                                placeholder="Enter your username" 
-                                required 
+                                value="{{ request.POST.username|default:'' }}"
                                 type="text"
                             />
                         </div>
@@ -122,17 +128,16 @@
                         <div class="label-row">
                             <label class="form-label" for="password">Password</label>
                         </div>
+                        {% if field_errors.password %}<span class="field-error">{{ field_errors.password }}</span>{% endif %}
                         <div class="input-wrapper">
                             <div class="input-icon">
                                 <span class="material-symbols-outlined">key</span>
                             </div>
                             <input 
                                 autocomplete="current-password" 
-                                class="form-input password-input" 
+                                class="form-input password-input{% if field_errors.password %} input-error{% endif %}" 
                                 id="password" 
                                 name="password" 
-                                placeholder="••••••••" 
-                                required 
                                 type="password"
                             />
                             <button class="toggle-visibility" type="button" onclick="togglePw()">

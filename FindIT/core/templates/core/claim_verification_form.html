@@ -43,22 +43,22 @@
             <div class="form-error">{{ form.non_field_errors|join:', ' }}</div>
             {% endif %}
 
-            <form method="post" enctype="multipart/form-data" class="verification-form">
+            <form method="post" enctype="multipart/form-data" class="verification-form" novalidate>
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="id_description">Why does this item belong to you?</label>
-                    {{ form.description }}
                     {% if form.description.errors %}
                     <div class="field-error">{{ form.description.errors|join:', ' }}</div>
                     {% endif %}
+                    {{ form.description }}
                 </div>
 
                 <div class="form-group">
                     <label for="id_proof_image">Upload proof image (optional)</label>
-                    {{ form.proof_image }}
                     {% if form.proof_image.errors %}
                     <div class="field-error">{{ form.proof_image.errors|join:', ' }}</div>
                     {% endif %}
+                    {{ form.proof_image }}
                     {% if verification and verification.proof_image %}
                     <p class="file-note">Current file: <a href="{{ verification.proof_image.url }}" target="_blank" rel="noopener">View uploaded proof</a></p>
                     {% endif %}
