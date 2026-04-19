@@ -119,7 +119,7 @@
             {% if active_tab == 'found' %}
             <section class="items-grid">
                 {% for item in found_items %}
-                <article class="item-card">
+                <article class="item-card{% if focus_item_id == item.id %} item-card-focus{% endif %}" id="found-item-{{ item.id }}" data-item-id="{{ item.id }}">
                     <div class="item-image">
                         {% if item.image %}
                         <img src="{{ item.image.url }}" alt="{{ item.item_name }}"/>
@@ -202,6 +202,16 @@
                             </div>
                         </div>
                         <p class="item-description">{{ item.description }}</p>
+                        <div class="item-footer">
+                            <button
+                                type="button"
+                                class="item-button btn-ai-search"
+                                data-ai-url="{% url 'core:ai-match-lost-item' item.id %}"
+                                data-item-name="{{ item.item_name|escapejs }}"
+                            >
+                                AI Search
+                            </button>
+                        </div>
                     </div>
                 </article>
                 {% empty %}
@@ -211,9 +221,57 @@
             {% endif %}
         </div>
     </main>
+
+    <div class="ai-modal" id="ai-match-modal" aria-hidden="true">
+        <div class="ai-modal-backdrop" data-ai-close></div>
+        <div class="ai-modal-panel" role="dialog" aria-modal="true" aria-labelledby="ai-modal-title">
+            <button class="ai-modal-close" type="button" data-ai-close aria-label="Close result panel">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+
+            <div class="ai-modal-header">
+                <div>
+                    <p class="ai-modal-kicker">AI Match Results</p>
+                    <h2 class="ai-modal-title" id="ai-modal-title">Searching...</h2>
+                </div>
+                <div class="ai-modal-badge" id="ai-modal-badge">Model ready</div>
+            </div>
+
+            <div class="ai-modal-body">
+                <div class="ai-modal-summary">
+                    <div class="ai-summary-card">
+                        <span class="ai-summary-label">Lost item</span>
+                        <strong id="ai-lost-name">-</strong>
+                        <span id="ai-lost-meta">-</span>
+                    </div>
+                    <div class="ai-summary-card">
+                        <span class="ai-summary-label">Detection</span>
+                        <strong id="ai-detection-label">-</strong>
+                        <span id="ai-detection-message">-</span>
+                    </div>
+                </div>
+
+                <div class="ai-results-section">
+                    <div class="ai-results-header">
+                        <h3>Similar found items</h3>
+                        <span id="ai-result-count">0 results</span>
+                    </div>
+                    <div class="ai-results-grid" id="ai-results-grid"></div>
+                    <p class="ai-empty-state" id="ai-empty-state">No similar found items were detected yet.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const toggle = document.getElementById('account-toggle');
         const dropdown = document.getElementById('account-dropdown');
+        const focusItem = document.querySelector('.item-card-focus');
+        if (focusItem) {
+            requestAnimationFrame(() => {
+                focusItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+        }
         if (toggle && dropdown) {
             toggle.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -226,6 +284,136 @@
             });
             dropdown.addEventListener('click', (e) => e.stopPropagation());
         }
+
+        const modal = document.getElementById('ai-match-modal');
+        const modalTitle = document.getElementById('ai-modal-title');
+        const modalBadge = document.getElementById('ai-modal-badge');
+        const lostName = document.getElementById('ai-lost-name');
+        const lostMeta = document.getElementById('ai-lost-meta');
+        const detectionLabel = document.getElementById('ai-detection-label');
+        const detectionMessage = document.getElementById('ai-detection-message');
+        const resultsGrid = document.getElementById('ai-results-grid');
+        const emptyState = document.getElementById('ai-empty-state');
+        const resultCount = document.getElementById('ai-result-count');
+        const closeButtons = modal ? modal.querySelectorAll('[data-ai-close]') : [];
+
+        function openModal() {
+            modal.classList.add('is-open');
+            modal.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('modal-open');
+        }
+
+        function closeModal() {
+            modal.classList.remove('is-open');
+            modal.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('modal-open');
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#39;');
+        }
+
+        function renderResults(payload) {
+            const { lost_item: lostItem, detection, results } = payload;
+            modalTitle.textContent = `Matches for ${lostItem.item_name}`;
+            modalBadge.textContent = `${payload.results_count} potential matches`;
+            lostName.textContent = lostItem.item_name;
+            lostMeta.textContent = `${lostItem.category_label} · ${lostItem.location_label} · ${lostItem.date_lost}`;
+            detectionLabel.textContent = detection.category_label || 'Other';
+            detectionMessage.textContent = detection.message || 'AI analysis complete.';
+            resultCount.textContent = `${results.length} result${results.length === 1 ? '' : 's'}`;
+
+            resultsGrid.innerHTML = '';
+            if (!results.length) {
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            results.forEach((result) => {
+                const reasons = (result.reasons || []).map((reason) => `<span>${escapeHtml(reason)}</span>`).join('');
+                const imageMarkup = result.image_url
+                    ? `<img src="${escapeHtml(result.image_url)}" alt="${escapeHtml(result.item_name)}"/>`
+                    : `<div class="ai-result-placeholder"><span class="material-symbols-outlined">image</span></div>`;
+
+                const card = document.createElement('a');
+                card.className = 'ai-result-card';
+                card.href = result.detail_url;
+                card.innerHTML = `
+                    <div class="ai-result-image">${imageMarkup}</div>
+                    <div class="ai-result-content">
+                        <div class="ai-result-topline">
+                            <h4>${escapeHtml(result.item_name)}</h4>
+                            <span class="ai-score">${result.score}% match</span>
+                        </div>
+                        <div class="ai-result-meta">
+                            <span>${escapeHtml(result.category_label)}</span>
+                            <span>${escapeHtml(result.location_label)}</span>
+                            <span>${escapeHtml(result.date_found)}</span>
+                        </div>
+                        <p class="ai-result-description">${escapeHtml(result.description || '')}</p>
+                        <div class="ai-result-reasons">${reasons}</div>
+                        <span class="ai-result-link">Open in Found Items</span>
+                    </div>
+                `;
+                resultsGrid.appendChild(card);
+            });
+        }
+
+        document.querySelectorAll('.btn-ai-search').forEach((button) => {
+            button.addEventListener('click', async () => {
+                const aiUrl = button.dataset.aiUrl;
+                const itemName = button.dataset.itemName || 'item';
+                modalTitle.textContent = `Analyzing ${itemName}...`;
+                modalBadge.textContent = 'AI scan in progress';
+                lostName.textContent = itemName;
+                lostMeta.textContent = 'Loading item details...';
+                detectionLabel.textContent = 'Scanning image';
+                detectionMessage.textContent = 'The model is checking the lost item image against found items.';
+                resultCount.textContent = '0 results';
+                resultsGrid.innerHTML = '';
+                emptyState.style.display = 'none';
+                openModal();
+
+                try {
+                    const response = await fetch(aiUrl, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                        credentials: 'same-origin',
+                    });
+                    const payload = await response.json();
+                    if (!response.ok) {
+                        throw new Error(payload.detail || 'Unable to run AI search.');
+                    }
+                    renderResults(payload);
+                } catch (error) {
+                    modalTitle.textContent = 'AI search failed';
+                    modalBadge.textContent = 'Try again';
+                    detectionLabel.textContent = 'Error';
+                    detectionMessage.textContent = error.message || 'The AI search could not be completed.';
+                    emptyState.style.display = 'block';
+                    emptyState.textContent = 'Unable to load matches right now.';
+                    resultCount.textContent = '0 results';
+                    openModal();
+                }
+            });
+        });
+
+        if (closeButtons.length) {
+            closeButtons.forEach((button) => button.addEventListener('click', closeModal));
+        }
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && modal.classList.contains('is-open')) {
+                closeModal();
+            }
+        });
     </script>
 </body>
 </html>

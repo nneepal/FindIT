@@ -11,6 +11,7 @@ from django.shortcuts import redirect, render
 
 from .detection import detect_item_category
 from .forms import ClaimVerificationForm, FoundItemReportForm, LostItemSearchForm
+from .matching import find_similar_found_items
 from .models import ClaimVerification, FoundItem, FoundItemClaim, LostItem, Notification
 
 
@@ -135,6 +136,11 @@ def listed_items(request):
     if sort not in {'newest', 'oldest'}:
         sort = 'newest'
 
+    focus_item_id = None
+    focus_value = request.GET.get('focus', '').strip()
+    if focus_value.isdigit():
+        focus_item_id = int(focus_value)
+
     found_items = FoundItem.objects.select_related('reported_by')
     lost_items = LostItem.objects.select_related('searched_by')
 
@@ -182,8 +188,53 @@ def listed_items(request):
         'lost_items': lost_items,
         'category_options': sorted(category_options.items(), key=lambda x: x[1]),
         'claimed_item_ids': claimed_item_ids,
+        'focus_item_id': focus_item_id,
     }
     return render(request, 'core/listeditems.html', context)
+
+
+def ai_match_lost_item(request, item_id):
+    if request.method != 'GET':
+        return HttpResponseNotAllowed(['GET'])
+
+    lost_item = get_object_or_404(LostItem.objects.select_related('searched_by'), pk=item_id)
+    match_data = find_similar_found_items(lost_item)
+
+    results = []
+    for candidate in match_data['results']:
+        found_item = candidate.item
+        results.append({
+            'id': found_item.id,
+            'item_name': found_item.item_name,
+            'category_label': found_item.get_category_display(),
+            'location_label': found_item.get_location_found_display(),
+            'date_found': found_item.date_found.strftime('%b %d, %Y'),
+            'description': found_item.description,
+            'image_url': found_item.image.url if found_item.image else '',
+            'reported_by': found_item.reported_by.username,
+            'claim_status': found_item.get_claim_status_display(),
+            'score': candidate.score,
+            'reasons': candidate.reasons,
+            'detail_url': f"{reverse('core:listed-items')}?tab=found&focus={found_item.id}",
+        })
+
+    lost_payload = {
+        'id': lost_item.id,
+        'item_name': lost_item.item_name,
+        'category_label': lost_item.get_category_display(),
+        'location_label': lost_item.get_location_lost_display(),
+        'date_lost': lost_item.date_lost.strftime('%b %d, %Y'),
+        'description': lost_item.description,
+        'image_url': lost_item.image.url if lost_item.image else '',
+        'searched_by': lost_item.searched_by.username,
+    }
+
+    return JsonResponse({
+        'lost_item': lost_payload,
+        'detection': match_data['lost_detection'],
+        'results': results,
+        'results_count': len(results),
+    })
 
 
 @login_required

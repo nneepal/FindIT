@@ -11,6 +11,7 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
 from accounts.forms import ProfileUpdateForm
 from accounts.models import UserProfile
+from accounts.name_sync import set_auth_user_full_name
 from core.forms import FoundItemReportForm, LostItemSearchForm
 from core.models import ClaimVerification, FoundItem, FoundItemClaim, LostItem, Notification
 
@@ -77,6 +78,8 @@ def _get_admin_stats():
 
 @admin_required
 def admin_dashboard_view(request):
+    UserProfile.objects.get_or_create(user=request.user)
+
     if request.method == 'POST':
         action = request.POST.get('action', '').strip()
 
@@ -92,12 +95,19 @@ def admin_dashboard_view(request):
             elif User.objects.filter(username=username).exists():
                 messages.error(request, 'A user with that username already exists.')
             else:
-                user = User.objects.create_user(username=username, email=email, password=password)
+                user = User.objects.create_user(
+                    username=username,
+                    email=email,
+                    password=password,
+                    first_name='',
+                    last_name='',
+                )
                 user.is_staff = is_staff
                 user.save(update_fields=['is_staff'])
                 profile, _ = UserProfile.objects.get_or_create(user=user)
                 profile.full_name = full_name
                 profile.save(update_fields=['full_name'])
+                set_auth_user_full_name(user.id, full_name)
                 messages.success(request, f'User "{username}" was added successfully.')
                 return redirect('admin-dashboard')
 

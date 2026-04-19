@@ -101,7 +101,7 @@
                     <div class="status-indicator"></div>
                 </div>
                 <div class="profile-info">
-                    <h1 class="profile-name">{{ request.user.get_full_name|default:request.user.username }}</h1>
+                    <h1 class="profile-name">{{ request.user.profile.get_full_name }}</h1>
                     <p class="profile-role">System Administrator</p>
                     <div class="profile-email">
                         <span class="material-symbols-outlined">mail</span>

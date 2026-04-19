@@ -5,6 +5,8 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.mail import EmailMultiAlternatives
 from django.template import loader
 
+from .name_sync import set_auth_user_full_name
+
 
 class SignupForm(forms.Form):
     full_name = forms.CharField(
@@ -125,10 +127,14 @@ class ProfileUpdateForm(forms.Form):
         full_name = self.cleaned_data.get('full_name', '').strip()
         self.profile.full_name = full_name
         self.profile.save(update_fields=['full_name'])
+        set_auth_user_full_name(self.user.id, full_name)
 
         self.user.username = self.cleaned_data.get('username', '').strip()
         self.user.email = self.cleaned_data.get('email', '').strip()
-        self.user.save(update_fields=['username', 'email'])
+        # Keep auth_user first_name/last_name unused; full name is stored in profile.full_name.
+        self.user.first_name = ''
+        self.user.last_name = ''
+        self.user.save(update_fields=['username', 'email', 'first_name', 'last_name'])
 
         new_password = self.cleaned_data.get('new_password', '')
         if new_password:

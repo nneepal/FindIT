@@ -7,6 +7,7 @@ from django.urls import reverse_lazy
 from django.core.mail import BadHeaderError
 
 from .forms import ExistingEmailPasswordResetForm, SignupForm
+from .name_sync import set_auth_user_full_name
 from .models import PasswordResetRequest
 
 
@@ -26,9 +27,12 @@ def signup_view(request):
                 username=username,
                 password=password,
                 email=email,
+                first_name='',
+                last_name='',
             )
             user.profile.full_name = full_name
             user.profile.save(update_fields=['full_name'])
+            set_auth_user_full_name(user.id, full_name)
             login(request, user)
             messages.success(request, f'Welcome to FINDIT, {full_name or username}!')
             return redirect('core:index')
