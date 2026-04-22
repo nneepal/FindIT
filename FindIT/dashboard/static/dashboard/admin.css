@@ -276,6 +276,38 @@ body {
     font-size: 0.875rem;
 }
 
+.admin-summary {
+    background-color: white;
+    padding: 1rem;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+}
+
+.dark .admin-summary {
+    background-color: #1e293b;
+    border-color: #334155;
+}
+
+.admin-summary-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.35rem;
+}
+
+.dark .admin-summary-title {
+    color: #f8fafc;
+}
+
+.admin-summary-text {
+    font-size: 0.95rem;
+    color: #64748b;
+}
+
+.dark .admin-summary-text {
+    color: #94a3b8;
+}
+
 /* Profile Card */
 .profile-card {
     background-color: white;

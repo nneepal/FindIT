@@ -35,6 +35,9 @@ def dashboard_view(request):
         form = ProfileUpdateForm(user=user, profile=profile)
 
     claimed_items = FoundItemClaim.objects.filter(claimed_by=user).select_related('found_item').order_by('-created_at')
+    claimed_items_count = claimed_items.count()
+    found_reports_count = FoundItem.objects.filter(reported_by=user).count()
+    lost_reports_count = LostItem.objects.filter(searched_by=user).count()
     verification_requests = ClaimVerification.objects.filter(claimed_by=user).select_related(
         'found_item',
         'claim',
@@ -44,6 +47,9 @@ def dashboard_view(request):
         'form': form,
         'profile': profile,
         'claimed_items': claimed_items,
+        'claimed_items_count': claimed_items_count,
+        'found_reports_count': found_reports_count,
+        'lost_reports_count': lost_reports_count,
         'verification_requests': verification_requests,
     })
 

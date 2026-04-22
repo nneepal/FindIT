@@ -82,9 +82,14 @@
                     </div>
                     <div class="upload-wrapper">
                         <label class="drop-zone" for="file-upload">
+                            <div class="preview-stage">
+                                <img id="report-image-preview" alt="Selected item preview" class="image-preview-image" hidden/>
+                                <div class="image-preview-placeholder" id="report-image-placeholder">
+                                    <span class="material-symbols-outlined">image</span>
+                                    <p>Preview will appear here</p>
+                                </div>
+                            </div>
                             <div class="drop-content">
-                                <p class="drop-main-text">Drag photo here</p>
-                                <p class="drop-sub-text">or click to browse from your device</p>
                                 <span class="select-file-btn">Select File</span>
                                 <p class="selected-file" id="selected-file-name">No file selected</p>
                             </div>
@@ -253,6 +258,8 @@
 
         const fileInput = document.getElementById('file-upload') || document.querySelector('input[name="image"]');
         const fileNameTarget = document.getElementById('selected-file-name');
+        const imagePreview = document.getElementById('report-image-preview');
+        const imagePlaceholder = document.getElementById('report-image-placeholder');
         const reportForm = document.querySelector('.report-form-wrap');
         const categorySelect = document.getElementById('{{ form.category.id_for_label }}');
         const detectionStatus = document.getElementById('detection-status');
@@ -309,9 +316,35 @@
             }
         }
 
+        let reportPreviewUrl = null;
+
+        function updateImagePreview(file) {
+            if (!imagePreview || !imagePlaceholder) {
+                return;
+            }
+
+            if (reportPreviewUrl) {
+                URL.revokeObjectURL(reportPreviewUrl);
+                reportPreviewUrl = null;
+            }
+
+            if (!file) {
+                imagePreview.hidden = true;
+                imagePreview.removeAttribute('src');
+                imagePlaceholder.hidden = false;
+                return;
+            }
+
+            reportPreviewUrl = URL.createObjectURL(file);
+            imagePreview.src = reportPreviewUrl;
+            imagePreview.hidden = false;
+            imagePlaceholder.hidden = true;
+        }
+
         if (fileInput && fileNameTarget) {
             fileInput.addEventListener('change', () => {
                 fileNameTarget.textContent = fileInput.files.length ? fileInput.files[0].name : 'No file selected';
+                updateImagePreview(fileInput.files.length ? fileInput.files[0] : null);
 
                 if (fileInput.files.length) {
                     detectCategoryFromImage(fileInput.files[0]);

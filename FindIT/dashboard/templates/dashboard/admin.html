@@ -95,19 +95,14 @@
                 </section>
             {% endif %}
 
-            <section class="profile-card">
-                <div class="profile-avatar">
-                    <img alt="Admin Profile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAn1f7LpT6WUTbsmM2-NP29Al4d7xQ_QtbFrVKqLeSDE_MyKREn4VflCM9hm9sF_fr1u0lWuZCiYeuZPPMWzlsnuvai61KuOHI_RksKAXroeHvb_IPQqtN3g-RbLVQBVAKHb-ws1WHnKzUH9qVXY8D99BY_5H-VRkP7PDfrSoAIwjaSPFZEkLej1rRRhWMplsNTgqd4fj3Au-aAbbofp_JuNkItevtpJd1T4Md_TLJcG3HVc70G1oGYLaWKS8lXBHAap_n76oMmA0"/>
-                    <div class="status-indicator"></div>
-                </div>
-                <div class="profile-info">
-                    <h1 class="profile-name">{{ request.user.profile.get_full_name }}</h1>
-                    <p class="profile-role">System Administrator</p>
-                    <div class="profile-email">
-                        <span class="material-symbols-outlined">mail</span>
-                        {{ request.user.email|default:"No email" }}
-                    </div>
-                </div>
+            <section class="admin-summary">
+                <h1 class="admin-summary-title">Admin Dashboard</h1>
+                <p class="admin-summary-text">
+                    Signed in as <strong>{{ request.user.profile.get_full_name|default:request.user.username }}</strong>
+                    {% if request.user.email %}
+                    ({{ request.user.email }})
+                    {% endif %}
+                </p>
             </section>
 
             <section class="stats-grid" id="stats-grid">

@@ -103,49 +103,30 @@
             </div>
             {% endif %}
 
-            <!-- Profile Header Card -->
-            <div class="profile-header-card">
-                <div class="profile-hero">
-                    <div class="profile-avatar">
-                        <span class="material-symbols-outlined avatar-icon">account_circle</span>
-                    </div>
-                    <div class="profile-info">
-                        <h1 class="profile-name">
-                            {{ profile.get_full_name }}
-                        </h1>
-                        <p class="profile-username">@{{ user.username }}</p>
-                        {% if user.email %}
-                        <p class="profile-email">
-                            <span class="material-symbols-outlined">mail</span>
-                            {{ user.email }}
-                        </p>
-                        {% endif %}
-                    </div>
+            <section class="dashboard-summary">
+                <div class="summary-copy">
+                    <p class="summary-kicker">My Dashboard</p>
+                    <h1 class="summary-title">Welcome, {{ profile.get_full_name|default:user.username }}</h1>
+                    <p class="summary-text">
+                        A quick look at your reports, claims, and account activity.
+                    </p>
                 </div>
-                <div class="profile-stats">
-                    <div class="stat-item">
-                        <span class="material-symbols-outlined stat-icon">calendar_today</span>
-                        <div class="stat-text">
-                            <span class="stat-label">Member since</span>
-                            <span class="stat-value">{{ user.date_joined|date:"M Y" }}</span>
-                        </div>
-                    </div>
-                    <div class="stat-item">
-                        <span class="material-symbols-outlined stat-icon">assignment</span>
-                        <div class="stat-text">
-                            <span class="stat-label">Reports submitted</span>
-                            <span class="stat-value">0</span>
-                        </div>
-                    </div>
-                    <div class="stat-item">
-                        <span class="material-symbols-outlined stat-icon">manage_search</span>
-                        <div class="stat-text">
-                            <span class="stat-label">Items found</span>
-                            <span class="stat-value">0</span>
-                        </div>
-                    </div>
+            </section>
+
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <p class="stat-label">Items claimed</p>
+                    <p class="stat-value">{{ claimed_items_count }}</p>
                 </div>
-            </div>
+                <div class="stat-card">
+                    <p class="stat-label">Found reports</p>
+                    <p class="stat-value">{{ found_reports_count }}</p>
+                </div>
+                <div class="stat-card">
+                    <p class="stat-label">Lost reports</p>
+                    <p class="stat-value">{{ lost_reports_count }}</p>
+                </div>
+            </section>
 
             <!-- Two-column layout -->
             <div class="dashboard-grid">
@@ -181,6 +162,13 @@
                             <span class="info-value">
                                 {% if user.email %}{{ user.email }}{% else %}<em class="no-value">Not set</em>{% endif %}
                             </span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">
+                                <span class="material-symbols-outlined">calendar_today</span>
+                                Member Since
+                            </span>
+                            <span class="info-value">{{ user.date_joined|date:"M Y" }}</span>
                         </div>
                     </div>
                 </div>
