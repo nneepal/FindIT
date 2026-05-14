@@ -272,7 +272,7 @@ def admin_dashboard_view(request):
         'reviewed_by',
     ).order_by('status', '-submitted_at')
 
-    pending_complaints = verifications.exclude(status='closed')
+    pending_complaints = verifications
 
     context = {
         'stats': _get_admin_stats(),

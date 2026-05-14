@@ -749,6 +749,11 @@ body {
     color: #8c2d2d;
 }
 
+.status-closed {
+    background: #e6edf0;
+    color: #39515a;
+}
+
 .claims-empty {
     margin: 0;
     padding: 0.8rem 0.2rem;

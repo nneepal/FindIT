@@ -112,11 +112,13 @@
                             <li>
                                 <div class="claim-row">
                                     <span>{{ claim.claimed_by.username }} <span>({{ claim.created_at|date:'M d, Y H:i' }})</span></span>
-                                    {% if claim.id in user_claim_ids %}
+                                    {% if claim.verification_status == 'closed' %}
+                                    <span class="verification-status status-closed">Complaint Closed</span>
+                                    {% else %}
                                     <span class="verification-status status-{{ claim.verification_status }}">{{ claim.verification_status|title }}</span>
                                     {% endif %}
                                 </div>
-                                {% if claim.id in user_claim_ids %}
+                                {% if claim.id in user_claim_ids and claim.verification_status != 'closed' %}
                                 <div class="claim-actions">
                                     <a href="{% url 'core:verify-claim' claim.id %}" class="verify-btn">
                                         {% if claim.verification_status == 'unverified' %}

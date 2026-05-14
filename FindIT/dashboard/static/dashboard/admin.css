@@ -1148,8 +1148,14 @@ body {
 }
 
 .status-closed {
-    background: #e2e8f0;
-    color: #334155;
+    background: #e6edf0;
+    color: #39515a;
+}
+
+.closed-label {
+    color: #64748b;
+    font-size: 0.85rem;
+    font-weight: 700;
 }
 
 .verification-form-inline {

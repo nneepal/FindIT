@@ -299,6 +299,11 @@ a {
     color: #8c2d2d;
 }
 
+.status-closed {
+    background: #e6edf0;
+    color: #39515a;
+}
+
 .verify-btn {
     margin-top: 8px;
     border: 0;

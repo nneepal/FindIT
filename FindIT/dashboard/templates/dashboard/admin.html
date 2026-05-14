@@ -395,9 +395,16 @@
                                         <td>{{ complaint.claimed_by.username }}</td>
                                         <td>{{ complaint.submitted_at|date:'M d, Y H:i' }}</td>
                                         <td>
+                                            {% if complaint.status == 'closed' %}
+                                            <span class="verification-status status-closed">Complaint Closed</span>
+                                            {% else %}
                                             <span class="verification-status status-{{ complaint.status }}">{{ complaint.get_status_display }}</span>
+                                            {% endif %}
                                         </td>
                                         <td>
+                                            {% if complaint.status == 'closed' %}
+                                            <span class="closed-label">Closed</span>
+                                            {% else %}
                                             <form method="post" action="{% url 'admin-dashboard' %}" class="verification-form-inline" novalidate>
                                                 {% csrf_token %}
                                                 <input type="hidden" name="action" value="close_complaint"/>
@@ -405,6 +412,7 @@
                                                 <textarea name="close_note" class="admin-message-input" placeholder="Reason for closing complaint"></textarea>
                                                 <button type="submit" class="btn-action btn-close">Close Complaint</button>
                                             </form>
+                                            {% endif %}
                                         </td>
                                     </tr>
                                 {% empty %}
